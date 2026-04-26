@@ -1,5 +1,10 @@
 @echo on
 
+IF NOT EXIST "database" (
+    ECHO "Creating database directory..."
+    MKDIR database
+)
+
 IF NOT EXIST ".venv-3.13" (
     ECHO "venv not exist, creating new one..."
     pyhton -m venv .venv-3.13
