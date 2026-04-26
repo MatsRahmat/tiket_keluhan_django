@@ -11,6 +11,12 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+
+def load_env():
+    print("============= load custom env =============")
+    
+load_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -114,7 +120,7 @@ USE_I18N = True
 
 USE_TZ = False
 
-APPEND_SLASH=False
+APPEND_SLASH=True
 
 
 # Static files (CSS, JavaScript, Images)

@@ -7,4 +7,5 @@ def index(req):
     return render(req, "home/index.html", {})
 
 def login(req):
-    return HttpResponse("ini halaman update lagi login nya")
+    return render(req, 'auth/login.html', {})
+    # return HttpResponse("ini halaman update lagi login nya")
