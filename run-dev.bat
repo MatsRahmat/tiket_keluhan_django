@@ -1,13 +1,18 @@
 @echo on
 
-REM Activate venv
+IF NOT EXIST ".venv-3.13" (
+    ECHO "venv not exist, creating new one..."
+    pyhton -m venv .venv-3.13
+)
+
+ECHO Activate venv
 call .venv-3.13\Scripts\activate.bat
 
-REM check pip list
+ECHO checking pip list
 call python -m pip list
 
 REM check requirements file
-echo checking requirements file
+ECHO checking requirements file
 IF EXIST "requirements.txt" (
     echo requirements file found, installing new dependecies
     call python -m pip install -r requirements.txt
