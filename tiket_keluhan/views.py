@@ -11,6 +11,10 @@ def index(req: request):
     print(session)
     return render(req, "home/index.html", {})
 
-def logout_view(req):
+def logout_view(req: request):
+    # clear semua key yang ada di request ketika logout
+    del req.session['username']
+    del req.session['user_id']
+    del req.session['login_id']
     logout(req)
     return redirect("/login")
