@@ -1,4 +1,4 @@
-@echo on
+@ECHO OFF
 
 IF NOT EXIST "database" (
     ECHO "Creating database directory..."
@@ -34,4 +34,5 @@ echo ======================================
 if not "%~1"=="" set "IP=%~1"
 echo start server on %IP%:%PORT%
 
-watchmedo auto-restart --directory=./ --pattern="*.py;*.html" --recursive -- uvicorn manajement_keluhan.asgi:application --host %IP% --port %PORT%
+call python manage.py runserver %IP%:%PORT%
+@REM watchmedo auto-restart --directory=./ --pattern="*.py;*.html;*.css;*.js" --recursive -- uvicorn manajement_keluhan.asgi:application --host %IP% --port %PORT%

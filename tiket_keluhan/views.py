@@ -1,11 +1,16 @@
-from django.http import HttpResponse
-from django.shortcuts import render
+from django.http import HttpResponse, request, response
+from django.shortcuts import render, redirect
+from django.contrib.auth import logout
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
-def index(req):
+@login_required(login_url="/login")
+def index(req: request):
+    session = req.session.get("login_id")
+    print(session)
     return render(req, "home/index.html", {})
 
-def login(req):
-    return render(req, 'auth/login.html', {})
-    # return HttpResponse("ini halaman update lagi login nya")
+def logout_view(req):
+    logout(req)
+    return redirect("/login")

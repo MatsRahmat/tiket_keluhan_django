@@ -124,6 +124,13 @@ APPEND_SLASH=True
 
 AUTH_USER_MODEL="tiket_keluhan.CustomUserModel"
 
+# ====================== [ SESSION MANAGENT ] ======================
+# umur session cookie dalam satuan detik
+SESSION_COOKIE_AGE= 20
+# expire ketika halaman browser di tutup
+SESSION_EXPIRE_AT_BROWSER_CLOSE=True
+# perpanjang setiap request baru
+SESSION_SAVE_EVERY_REQUEST=True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
