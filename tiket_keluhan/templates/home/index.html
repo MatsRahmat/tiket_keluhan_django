@@ -1,12 +1,31 @@
 {% extends 'base_layout.html' %}
-{%load static %}
+{% load static %}
 
 {% block title %}
   Home Page
 {% endblock %}
 
-{%block content%}
-<div>
-    <h1 class="text-blue-200">Ini Homepage nya</h1>
-</div>
-{%endblock%}
+{% block content %}
+  <div>
+    <h1 class="text-center text-primary">Ini Homepage nya</h1>
+  </div>
+  <div class="container">
+    <div class="d-flex justify-content-between">
+      <h2>List Tiket</h2>
+      <a href="" class="btn btn-primary capitalize">buat baru</a>
+    </div>
+    <div class="border border-dark rounded-3" style="height: 80dvh;">
+      <table style="padding: 1rem; width: 100%;" class="">
+        <tr class="border-dark border-bottom">
+          <td class="p-2">
+            <div class="d-flex justify-content-between">
+              <h5 class="p-0 m-0">Keluhan 1</h5>
+              <h4 class="pr-2"># Tiket 12</h4>
+            </div>
+            <p class="m-0">Ini merupakan keluhan nya</p>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+{% endblock %}

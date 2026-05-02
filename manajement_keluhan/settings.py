@@ -126,7 +126,7 @@ AUTH_USER_MODEL="tiket_keluhan.CustomUserModel"
 
 # ====================== [ SESSION MANAGENT ] ======================
 # umur session cookie dalam satuan detik
-SESSION_COOKIE_AGE= 20
+SESSION_COOKIE_AGE= 60*30
 # expire ketika halaman browser di tutup
 SESSION_EXPIRE_AT_BROWSER_CLOSE=True
 # perpanjang setiap request baru
@@ -136,5 +136,5 @@ SESSION_SAVE_EVERY_REQUEST=True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
-# STATICFILES_DIRS = [BASE_DIR / "static"]
-STATIC_ROOT = BASE_DIR / 'static'
+STATICFILES_DIRS = [BASE_DIR / "static"]
+# STATIC_ROOT = BASE_DIR / 'static'
