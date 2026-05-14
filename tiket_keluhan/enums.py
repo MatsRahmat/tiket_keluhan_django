@@ -7,3 +7,9 @@ class RoleEnum(Enum):
     pihak_ketiga =4
     klien = 5
     
+    
+class MesgTitleEnum(Enum):
+    SUCCESS = "Berhasil"
+    FAILED  = "Gagal"
+    WARNING = "Peringatan"
+

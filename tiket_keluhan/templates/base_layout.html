@@ -7,8 +7,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
-    {% comment %} <script defer src="{% static 'js/tailwindcss.min.js' %}"></script> {% endcomment %}
-
+    <style>
+      :root {
+        --c-sky-200: oklch(74.6% 0.16 232.661);
+      }
+      
+      @keyframes slideOutRight {
+        0% {
+          transform: translateX(50%);
+        }
+        100% {
+          transform: translateX(0);
+        }
+      }
+    </style>
     <title>
       {% block title %}
         Tiket Keluhan
@@ -16,12 +28,80 @@
     </title>
   </head>
   <body>
-
-    <div id="content">
+    <div id="content" class="container">
       {% block content %}
 
       {% endblock %}
     </div>
-    <script src="{% static 'js/bootstrap.bundle.js' %}" ></script>
+
+    {% comment %}================ Toastify ================{% endcomment %}
+    <div id="toas-container" class="p-3" style="position: fixed; top: 0; right: 0; animation: slideOutRight 0.5s ease forwards;" {% if not messages %}hidden{% endif %}>
+      <div id="toas-mesg" class="p-2 rounded-3 alert" style="max-width: 24rem; cursor: pointer; border: #000; background: var(--c-sky-200);" title="Close">
+        <div class="d-flex justify-content-between gap-2">
+          <h4 class="text-truncate">Alert</h4>
+          {% comment %} <h4 class="text-truncate">{{ toast.title }}</h4> {% endcomment %}
+          {% comment %} <button id="btn-toast-hidden" class="btn bg-light border rounded-3">X</button> {% endcomment %}
+        </div>
+        <ul>
+          {% for mesg in messages %}
+          <li style="list-style-type: none;" class="text-{{ mesg.tags }}">{{ mesg }}</li>
+          {% endfor %}
+        </ul>
+        {% comment %} <p>{{ toast.mesg }}</p> {% endcomment %}
+      </div>
+    </div>
+
+    {% comment %}================ Modal Delete ================{% endcomment %}
+    {% if is_delete and mesg %}
+      <div style="background: #000; opacity: 0.6; position: fixed; left: 0; right: 0; top: 0; bottom: 0;"></div>
+      <div style="position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%);">
+        <div class="d-flex justify-content-center align-items-center" style="height: 90dvh;">
+          <form action="{{ delete_url }}" method="POST" class="border border-dark p-2 rounded-3 bg-light" style="max-width: 70dvw;">
+            {% csrf_token %}
+            <h4>{{ title }}</h4>
+            <p>{{ mesg }}</p>
+            <div class="d-flex justify-content-between gap-2">
+              <button class="btn btn-primary border" style="width: 100%;" type="submit">Ya</button>
+              <a class="btn btn-light border" style="width: 100%;" href="{{ back_url }}">Tidak</a>
+            </div>
+          </form>
+        </div>
+      </div>
+    {% endif %}
+
+    {% comment %}bootstrap bundle{% endcomment %}
+    <script src="{% static 'js/bootstrap.bundle.js' %}"></script>
+    {% comment %}jquery{% endcomment %}
+    <script src="{% static 'js/jquery-4.0.0.min.js' %}"></script>
+    <script>
+      // =============== PREDEFINE STATE ===============
+      const DEFAULT_TIMEOUT = 5000 // 5 Detik
+      let timerTimeout;
+      
+      // =============== PREDEFINE FUNCION ===============
+      // Button untuk hide notif
+      function closeToastModal() {
+        if (!$('#toas-container').attr('hidden')) {
+          $('#toas-container').attr('hidden', true)
+        }
+      }
+      
+      // =============== ON READY DOCUMENT ===============
+      $(document).ready(function () {
+        console.log("I'm ready")
+      
+        $('#toas-container').on('click', closeToastModal)
+      
+        if (!$('#toas-container').attr('hidden')) {
+          // untuk auto close modal message nya ketika sudah 5 detik
+          timerTimeout = setTimeout(closeToastModal, DEFAULT_TIMEOUT)
+        }
+      }) //* End of scope ready function
+      
+      // =============== CLEAR STATE ===============
+      $(window).on('unload', function () {
+        clearTimeout(timerTimeout)
+      })
+    </script>
   </body>
 </html>

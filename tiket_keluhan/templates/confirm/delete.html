@@ -1,0 +1,24 @@
+{% extends 'base_layout.html' %}
+{% load static %}
+
+{% block title %}
+  {% if title %}
+    {{ title }}
+  {% else %}
+    Delete Page
+  {% endif %}
+{% endblock %}
+
+{% block content %}
+  {% comment %} <div class="d-flex justify-content-center align-items-center" style="height: 90dvh;">
+    <form action="{{ delete_url }}" method="POST" class="border border-dark p-2 rounded-3" style="max-width: 70dvw;">
+      {% csrf_token %}
+      <h4>{{ title }}</h4>
+      <p>{{ mesg }}</p>
+      <div class="d-flex justify-content-between gap-2">
+        <button class="btn btn-primary border" style="width: 100%;" type="submit">Ya</button>
+        <a class="btn btn-light border" style="width: 100%;" href="{{ back_url }}">Tidak</a>
+      </div>
+    </form>
+  </div> {% endcomment %}
+{% endblock %}

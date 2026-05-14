@@ -12,11 +12,31 @@
   <div class="container">
     <div class="d-flex justify-content-between">
       <h2>List Tiket</h2>
-      <a href="" class="btn btn-primary capitalize">buat baru</a>
+      <a href="/tiket" class="btn btn-primary capitalize">buat baru</a>
     </div>
-    <div class="border border-dark rounded-3" style="height: 80dvh;">
-      <table style="padding: 1rem; width: 100%;" class="">
-        <tr class="border-dark border-bottom">
+    <div class="mt-4" style="">
+      <table style="padding: 1rem; width: 100%; height: 100%; overflow-y: auto;" class="table table-striped table-hover border border-dark">
+        {% if tickets %}
+          {% for tiket in tickets %}
+            <tr class="border-dark border-bottom">
+              <td class="">
+                <div class="row">
+                  <div class="col-10">
+                    <h6 class="">#{{ tiket }}</h6>
+                    <h5 class="p-0 m-0">{{ tiket.subject }}</h5>
+                    <p class="m-0">{{ tiket.description }}</p>
+                  </div>
+                  <div class="col d-flex justify-content-center gap-2 py-3">
+                    <a href="/tiket/{{ tiket.id }}/edit" role="button" class="btn btn-primary">Edit</a>
+                    <a href="/tiket/{{ tiket.id }}/delete" role="button" class="btn btn-danger">Delete</a>
+                    {% comment %} <button class="btn btn-danger">Delete</button> {% endcomment %}
+                  </div>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        {% endif %}
+        {% comment %} <tr class="border-dark border-bottom">
           <td class="p-2">
             <div class="d-flex justify-content-between">
               <h5 class="p-0 m-0">Keluhan 1</h5>
@@ -24,7 +44,7 @@
             </div>
             <p class="m-0">Ini merupakan keluhan nya</p>
           </td>
-        </tr>
+        </tr> {% endcomment %}
       </table>
     </div>
   </div>
