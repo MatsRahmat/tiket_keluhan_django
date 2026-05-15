@@ -1,0 +1,20 @@
+{% extends 'base_layout.html' %}
+
+{% block base_content %}
+  <div class="row">
+    <div class="col-1 border-end" style="padding: 0; padding-top: 1.4rem;">
+      <div>
+        <p class="fs-5 text-center">Admin Panel</p>
+      </div>
+      <div class="list-group">
+        <a href="{% url 'home' %}" class="list-group-item list-group-item-action">Tiket</a>
+        <a href="{% url 'user-list' %}" class="list-group-item list-group-item-action">User</a>
+      </div>
+    </div>
+    <div class="col-11 m-0 p-0 p-2">
+      {% block content %}
+
+      {% endblock %}
+    </div>
+  </div>
+{% endblock %}

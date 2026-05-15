@@ -5,14 +5,15 @@ from tiket_keluhan.enums import (
 )
 
 class AuthForm(forms.Form):
-    login_id = forms.CharField(label="Login Id", max_length=100)
-    password = forms.CharField(label="Password", widget=forms.PasswordInput)
-    # class Meta:
-    #     model = CustomUserModel
-    #     fields= ['login_id','password']
-    #     widgets={
-    #         'password': forms.PasswordInput
-    #     }
+    # login_id = forms.TextInput(attrs={"class": "form-control"})
+    # password = forms.PasswordInput(attrs={"class": "form-control"})
+    class Meta:
+        model = CustomUserModel
+        fields= ['login_id','password']
+        widgets={
+            'login_id': forms.PasswordInput(attrs={"class": "form-control"}),
+            'password': forms.TextInput(attrs={"class": "form-control"})
+        }
     
 class TiketForm(forms.ModelForm):
     class Meta:

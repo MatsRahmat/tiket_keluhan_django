@@ -4,15 +4,81 @@
   Login Page
 {% endblock %}
 
-{% block content %}
-  <div id="form-body" class="place-center" style="height: 100dvh;">
-    <div class="border p-2">
-      <h1 class="text-center">Login</h1>
-      <form class="" action="/login" method="post" enctype="application/x-www-form-urlencoded">
+{% block base_content %}
+  <div id="form-body" class="place-center" style="height: 80dvh;">
+    <div class="border p-2" style="width: 20dvw;">
+      <h4 class="text-center">Login</h4>
+      <form class="" action="{% url 'login' %}" method="post">
         {% csrf_token %}
-        <table class="">{{ form.as_table }}</table>
-        <button type="submit" class="btn btn-primary" style="width: 100%;">Submit</button>
+        <div class="mb-2">
+          <label for="login_id" class="form-label">Login Sebagai</label>
+          <select name="login_as" id="login_as" class="form-select">
+            <option value="1" selected>Nasabah</option>
+            <option value="2">Operator</option>
+          </select>
+        </div>
+        <div class="">
+          <label for="login_id" class="form-label">Login Id</label>
+          <input type="text" id="login_id" name="login_id" class="form-control" required />
+        </div>
+        <div class="" id="user_id_el">
+          <label for="user_id" class="form-label">User Id</label>
+          <input type="text" id="user_id" name="user_id" class="form-control" />
+        </div>
+        <div class="" id="password_el">
+          <label for="password_field" class="form-label">Password</label>
+          <input type="password" id="password_field" name="password" class="form-control" />
+        </div>
+        <div class="mt-3">
+          <button type="submit" class="btn btn-primary" style="width: 100%;">Submit</button>
+        </div>
       </form>
     </div>
   </div>
+{% endblock %}
+
+{% block script %}
+  <script id="login-page">
+    $(document).ready(function (e) {
+      // ============== Global Page Definition ===============
+    
+      // container element
+      const userIdEl = $('#user_id_el')
+      const passEl = $('#password_el')
+      // input element
+      const userIdIn = $('#user_id')
+      const passIn = $('#password_field')
+    
+      function nasabahField() {
+        passIn.removeAttr('required')
+        passEl.hide()
+        // ---------------------------
+        userIdIn.attr('required', true)
+        userIdEl.show()
+      }
+    
+      function operatorField() {
+        userIdIn.removeAttr('required')
+        userIdEl.hide()
+        // ---------------------------
+        passIn.attr('required', true)
+        passEl.show()
+      }
+    
+      // Hide ketika pertama kali load dokument
+      nasabahField()
+    
+      // on change select event
+      $('#login_as').on('change', function () {
+        const curVal = $(this).val()
+        if (curVal == '1') {
+          // ###### Login sebagai nasabah ######
+          nasabahField()
+        } else {
+          // ###### Login sebagai operator ######
+          operatorField()
+        }
+      })
+    })
+  </script>
 {% endblock %}

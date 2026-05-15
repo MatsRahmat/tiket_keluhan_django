@@ -21,8 +21,8 @@ from tiket_keluhan.views import (
 
 urlpatterns = [
     path("", views.index, name="home"),
-    path("login", AuthView.as_view(), name="auth-view"),
-    path("logout", views.logout_view, name="logout-view"),
+    path("login", AuthView.as_view(), name="login"),
+    path("logout", views.logout_view, name="logout"),
     
     # ================================ TIKET ================================
     path('tiket', TiketCreateView.as_view(), name="list-tiket"),

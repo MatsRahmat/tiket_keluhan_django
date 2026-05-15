@@ -9,6 +9,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse, request, response
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib import messages
 from tiket_keluhan.forms import (
     AuthForm, 
@@ -55,6 +56,7 @@ def logout_view(req: request):
     del req.session['username']
     del req.session['user_id']
     del req.session['login_id']
+    del req.session['is_login']
     logout(req)
     return redirect("/login")
 
@@ -78,38 +80,46 @@ class AuthView(View):
     def get(self, req, *args, **kwargs):
         login_session = req.session.get("login_id")
         if login_session is not None:
+            messages.success(req, "Sudah berhasil login")
             return redirect("/")
-        form = AuthForm()
-        return render(req, 'auth/login.html',{"form":form})
+        return render(req, 'auth/login.html',)
 
     def post(self, req, *args, **kwargs):
-        form = AuthForm(req.POST)
-        context = {}
-        if form.is_valid():
-            login_id = form.cleaned_data['login_id']
-            password = form.cleaned_data['password']
-            user = authenticate(req,login_id=login_id, password=password)
-            if user:
-                login(req, user)
-                req.session['username'] = user.username
-                req.session['user_id'] = user.id
-                req.session['login_id'] = user.login_id
-                messages.success(req,"Berhasil login")
-                # context = show_toast(context, "Berhasil", "Berhasil login")
-                return redirect("/", context)
-            else:
-                messages.error(req,"Password atau login id salah")
-                context = show_toast(context, "Gagal", "Password atau login id salah")
-                # print(context)
-                return redirect("/login", context)
-        else:
-            messages.error(req,"Login id atau password tidak valid")
-            context = show_toast(context, "Gagal", "Login id atau password tidak boleh kosong")
-            return redirect("/login", context)
+        login_as = req.POST.get('login_as')
+        login_id = req.POST.get('login_id')
+        user_id = req.POST.get('user_id')
+        password = req.POST.get('password')
+        
+        # ===== Validasi value ======
+        if not login_id:
+            messages.error(req, "Login ID diperlukan")
+            return redirect('/login')
+        
+        # Login sebagai nasabah
+        if login_as == '1' and not user_id:
+            messages.error(req, "User Id diperlukan")
+            return redirect('/login')
+        
+        # Login sebagai operator
+        elif login_as == '2' and not password:
+            messages.error(req, "Password diperlukan")
+            return redirect('/login')
             
+        context = {}
+        user = authenticate(req,login_id=login_id, password=password)
+        if user:
+            login(req, user)
+            req.session['username'] = user.username
+            req.session['user_id'] = user.id
+            req.session['login_id'] = user.login_id
+            req.session["is_login"] = True
+            messages.success(req,"Berhasil login")
+            return redirect("/", context)
+        else:
+            messages.error(req,"Password atau login id salah")
+            return redirect("/login", context)
+        
                 
-
-
 ###################################################
 #                   TIKET CLASS VIEW
 ###################################################
@@ -118,7 +128,7 @@ class TiketListView(ListView):
     model = TiketModel
     template_name = "/"
 
-class TiketDetailView(DetailView):
+class TiketDetailView(LoginRequiredMixin,DetailView):
     model = TiketModel
     form_class = TiketForm
     template_name="tiket/form_tiket.html"
@@ -155,7 +165,7 @@ class TiketCreateView(CreateView):
         return context
     
     
-class TiketUpdateView(UpdateView):
+class TiketUpdateView(LoginRequiredMixin,UpdateView):
     model = TiketModel
     fields = ['login_id','subject', 'description']
     template="tiket/form_tiket.html"
@@ -182,7 +192,7 @@ class TiketUpdateView(UpdateView):
         return response
     
     
-class TiketDeleteView(DeleteView):
+class TiketDeleteView(LoginRequiredMixin,DeleteView):
     model = TiketModel
     template_name = "confirm/delete.html"
     success_url = reverse_lazy("home")
@@ -207,7 +217,7 @@ class TiketDeleteView(DeleteView):
 ###################################################
 #                   USER CLASS VIEW
 ###################################################
-class UserListView(ListView):
+class UserListView(LoginRequiredMixin,ListView):
     model = CustomUserModel
     template_name = "user/list_user.html"
     context_object_name = "list_user"
@@ -222,7 +232,7 @@ class UserListView(ListView):
         return qs
         # return super().get_queryset()
     
-class UserCreateView(CreateView):
+class UserCreateView(LoginRequiredMixin,CreateView):
     model = CustomUserModel
     template_name = "user/user_form.html"
     form_class = UserForm
@@ -241,8 +251,7 @@ class UserCreateView(CreateView):
     #     print("set kwargs")
     #     return kwargs
 
-
-class UserUpdateView(UpdateView):
+class UserUpdateView(LoginRequiredMixin,UpdateView):
     model = CustomUserModel
     template_name = "user/user_form.html"
     form_class = UserForm
@@ -255,7 +264,7 @@ class UserUpdateView(UpdateView):
         context["action"] = "update" 
         return context
 
-class UserDeleteView(DeleteView):
+class UserDeleteView(LoginRequiredMixin,DeleteView):
     model = CustomUserModel
     template_name = "user/list_user.html"
     success_url = reverse_lazy("user-list")
@@ -265,7 +274,6 @@ class UserDeleteView(DeleteView):
         context = super().get_context_data(**kwargs)
         context = context_modal_delete(context, "Hapus User", f"Apakah anda yakin ingin menghapus {obj.username}?", f"/user/{obj.id}/delete", "/user") 
         return context
-
     
     def delete(self, request, *args, **kwargs):
         obj = self.get_object()

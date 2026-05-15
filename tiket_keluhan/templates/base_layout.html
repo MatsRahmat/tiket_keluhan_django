@@ -10,6 +10,7 @@
     <style>
       :root {
         --c-sky-200: oklch(74.6% 0.16 232.661);
+        --c-teal-400: oklch(77.7% 0.152 181.912);
       }
       
       @keyframes slideOutRight {
@@ -33,11 +34,26 @@
     </title>
   </head>
   <body>
-    <div id="content" class="container">
-      {% block content %}
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark bg-primary stiky-top text-light">
+      <div style="width: 100%; padding-inline: 2rem;" class="d-flex justify-content-between align-items-center py-1">
+        <h3 class="text-uppercase">Tiket Keluhan</h3>
+        <div class="d-flex gap-2 align-items-center">
+          {% if request.session.is_login %}
+          <p class="p-0 m-0">{{ request.user.login_id }}</p>
+          <a href="{% url 'logout' %}" role="button" class="btn border-light text-light">Logout</a>
+          {% else %}
+          <a href="{% url 'login' %}" role="button" class="btn btn-primary border-light">Login</a>
+          {% endif %}
+        </div>
+      </div>
+    </nav>
 
-      {% endblock %}
-    </div>
+    <div class="container-fluid">
+    {% block base_content %}
+      <!-- Base Content goes here -->
+    {% endblock base_content %}
+  </div>
 
     {% comment %}================ Toastify ================{% endcomment %}
     <div id="toas-container" class="p-3" style="position: fixed; top: 0; right: 0; animation: slideOutRight 0.5s ease forwards;" {% if not messages %}hidden{% endif %}>
@@ -78,7 +94,8 @@
     <script src="{% static 'js/bootstrap.bundle.js' %}"></script>
     {% comment %}jquery{% endcomment %}
     <script src="{% static 'js/jquery-4.0.0.min.js' %}"></script>
-    <script>
+    {% block script %}{% endblock script %}
+    <script class="base-page">
       // =============== PREDEFINE STATE ===============
       const DEFAULT_TIMEOUT = 5000 // 5 Detik
       let timerTimeout;

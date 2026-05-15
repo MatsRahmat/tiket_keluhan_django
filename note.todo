@@ -7,6 +7,8 @@ Flow:
          - Tiket Aktor nasabah -> ketika nasabah memasuki halaman tambah tiket secara anonim maka akan tampil form dengan kolom login_id juga ada, header navbar aksi untuk login dan setelah selesai membuat tiket maka akan diredirect ke tampilan suces saja. pada tampilan sukses akan disarankan untuk login atau tidak
          - nasabah yg ingin melihat pernah membuat tiket apa saja harus login menggunakan login id dan user id (tanpa ppassword) karena login id ini akan menjadi uniq untuk mapping pada table tiket.
          - tidak terdapat side bar, hanya navbar yang menampilkan infomasi terkait session aktor apakah sudah login atau anonim
+         - jika nasabah sudah login maka dia akan bisa melihat semua tiket yg pernah dia buat by login-id
+         - jika belum dan ingin melihat, maka akan di arahkan ke halaman login terlebih dahulu
 
     Login Required POV (Operation, Direktur, atau Pihak ke 3):
         - Aktor harus login dan valid untuk dapat mengakses aplikasi. jenis halaman yang dapat di akses tergangung dari level role nya.
