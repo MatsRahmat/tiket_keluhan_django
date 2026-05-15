@@ -1,0 +1,51 @@
+{% extends 'base_layout.html' %}
+{% block title %}
+  Tiket
+{% endblock %}
+
+{% block content %}
+  <div class="my-3">
+    <div>
+      <h1>List User</h1>
+    </div>
+    <div class="d-flex justify-content-end">
+      <a role="button" href="/user/add" class="btn btn-primary">Tambah User</a>
+    </div>
+    <hr>
+    {% if list_user %}
+      <table class="table table-striped table-hover">
+        <colgroup>
+        </colgroup>
+        <thead>
+          <tr>
+            <th scope="col" class="col-mini">No</th>
+            <th scope="col">Login ID</th>
+            <th scope="col">Username</th>
+            <th scope="col">Role</th>
+            <th scope="col" class="col-mini">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for user in list_user %}
+            <tr>
+              <th scope="col" class="col-mini">{{ forloop.counter }}</th>
+              <td>{{ user.login_id }}</td>
+              <td>{{ user.username }}</td>
+              <td>{{ user.role_label }}</td>
+              <td>
+                <div class="d-flex justify-content-center gap-2">
+                  <a role="button" href="{% url 'user-edit' user.id %}" class="btn btn-secondary" style="">Edit</a>
+                  <a role="button" href="{% url 'user-delete' user.id %}" class="btn btn-danger" style="">Hapus</a>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <div>
+        <h4>Tidak ada data</h4>
+      </div>
+    {% endif %}
+  </div>
+{% endblock %}

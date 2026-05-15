@@ -122,7 +122,7 @@ USE_I18N = True
 
 USE_TZ = False
 
-APPEND_SLASH=True
+APPEND_SLASH=False
 
 AUTH_USER_MODEL="tiket_keluhan.CustomUserModel"
 

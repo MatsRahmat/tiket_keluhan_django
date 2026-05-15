@@ -18,3 +18,15 @@ def show_toast_2(title:str, mesg:str) -> dict:
         }
     }
     
+
+def context_modal_delete(ctx:dict, title:str, mesg:str,delete_url:str,back_url:str) -> dict:
+    if not ctx:
+        ctx = {}
+        
+    ctx["is_delete"] = True
+    ctx["delete_url"] = delete_url
+    ctx["title"] = title
+    ctx["mesg"] = mesg
+    ctx["back_url"] = back_url
+    
+    return ctx

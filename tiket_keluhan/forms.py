@@ -1,5 +1,8 @@
 from django import forms
 from tiket_keluhan.models import CustomUserModel, TiketModel
+from tiket_keluhan.enums import (
+    RoleEnum
+)
 
 class AuthForm(forms.Form):
     login_id = forms.CharField(label="Login Id", max_length=100)
@@ -21,4 +24,23 @@ class TiketForm(forms.ModelForm):
             "description": forms.Textarea(attrs={"class": "form-control"}),
         }
         
-        
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = CustomUserModel
+        fields = ['login_id','username', 'password', 'role']
+        widgets = {
+            'login_id': forms.TextInput(attrs={"class": "form-control"}),
+            'username': forms.TextInput(attrs={"class": "form-control"}),
+            'password': forms.PasswordInput(attrs={"class": "form-control"}),
+            'role': forms.Select(attrs={"class": "form-control"}, choices=[(r.value, r.name.replace("_", " ").title()) for r in RoleEnum][1:]),
+        }
+    
+    # def __init__(self, *args, **kwargs):
+    #     roles = kwargs.pop("roles", None)
+    #     super().__init__(*args, **kwargs)
+    #     if roles:
+    #         self.fields["role"].widget = forms.Select(
+    #         choices=roles,
+    #         attrs={ "class": "form-select" }
+    #         )

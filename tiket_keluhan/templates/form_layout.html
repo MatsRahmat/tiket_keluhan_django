@@ -1,0 +1,16 @@
+{% extends 'base_layout.html' %}
+
+{% block content %}
+    <div class="card my-2">
+        <div class="card-header bg-primary text-light">
+            {% block card_header %}
+            <span>&nbsp;</span>
+            {% endblock card_header %}
+        </div>
+        <div class="card-body">
+            {% block form %}
+            <!-- Form goes here-->
+            {% endblock form %}
+        </div>
+    </div>
+{% endblock content %}

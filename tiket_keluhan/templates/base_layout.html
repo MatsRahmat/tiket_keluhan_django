@@ -20,6 +20,11 @@
           transform: translateX(0);
         }
       }
+
+      .col-mini {
+        width: 10%;
+        text-align: center;
+      }
     </style>
     <title>
       {% block title %}
@@ -53,20 +58,20 @@
 
     {% comment %}================ Modal Delete ================{% endcomment %}
     {% if is_delete and mesg %}
-      <div style="background: #000; opacity: 0.6; position: fixed; left: 0; right: 0; top: 0; bottom: 0;"></div>
-      <div style="position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%);">
-        <div class="d-flex justify-content-center align-items-center" style="height: 90dvh;">
-          <form action="{{ delete_url }}" method="POST" class="border border-dark p-2 rounded-3 bg-light" style="max-width: 70dvw;">
-            {% csrf_token %}
-            <h4>{{ title }}</h4>
-            <p>{{ mesg }}</p>
-            <div class="d-flex justify-content-between gap-2">
-              <button class="btn btn-primary border" style="width: 100%;" type="submit">Ya</button>
-              <a class="btn btn-light border" style="width: 100%;" href="{{ back_url }}">Tidak</a>
-            </div>
-          </form>
-        </div>
+    <div style="background: #000; opacity: 0.6; position: fixed; left: 0; right: 0; top: 0; bottom: 0;"></div>
+    <div style="position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%);">
+      <div class="d-flex justify-content-center align-items-center" style="height: 90dvh;">
+        <form action="{{ delete_url }}" method="POST" class="border border-dark p-2 rounded-3 bg-light" style="max-width: 70dvw;">
+          {% csrf_token %}
+          <h4>{{ title }}</h4>
+          <p>{{ mesg }}</p>
+          <div class="d-flex justify-content-between gap-2">
+            <button class="btn btn-primary border" style="width: 100%;" type="submit">Ya</button>
+            <a class="btn btn-light border" style="width: 100%;" href="{{ back_url }}">Tidak</a>
+          </div>
+        </form>
       </div>
+    </div>
     {% endif %}
 
     {% comment %}bootstrap bundle{% endcomment %}

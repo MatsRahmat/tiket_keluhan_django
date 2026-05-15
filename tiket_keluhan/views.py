@@ -2,7 +2,7 @@ import json
 from typing import Any
 from django.views import View
 from django.views.generic import (
-    DetailView, UpdateView,ListView, CreateView, DeleteView
+    DetailView, UpdateView,ListView, CreateView, DeleteView,
 )
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, get_object_or_404
@@ -13,19 +13,23 @@ from django.contrib import messages
 from tiket_keluhan.forms import (
     AuthForm, 
     TiketForm,
+    UserForm
 )
 
 from tiket_keluhan.utils import (
     show_toast,
     show_toast_2,
+    context_modal_delete,
 )
 
 from tiket_keluhan.enums import (
-    MesgTitleEnum
+    MesgTitleEnum,
+    RoleEnum
 )
 
 from tiket_keluhan.models import (
-    TiketModel
+    TiketModel,
+    CustomUserModel,
 )
 
 # ============================================
@@ -150,6 +154,7 @@ class TiketCreateView(CreateView):
         #     context.update(self.extra_context)
         return context
     
+    
 class TiketUpdateView(UpdateView):
     model = TiketModel
     fields = ['login_id','subject', 'description']
@@ -162,7 +167,7 @@ class TiketUpdateView(UpdateView):
         # if not context:
         #     context = {}
         
-        # context["action"] = "update"
+        context["action"] = "update"
     
         # if hasattr(self, "extra_context") and self.extra_context:
         #     print(self.extra_context)
@@ -190,7 +195,7 @@ class TiketDeleteView(DeleteView):
         context["title"] = "Hapus Tiket"
         context["mesg"] = f"Apakah anda yakin ingin menghapus tiket #{self.object.no_tiket}?"
         
-        context = show_toast(context, "Success")
+        # context = show_toast(context, "Success")
         
         return context
     
@@ -199,25 +204,78 @@ class TiketDeleteView(DeleteView):
         return super().delete(request, *args, **kwargs)
 
     
-class TiketView(View):
-    def get(self, req, *args, **kwargs):
-        action = req.GET.get("action")
-        form = TiketForm()
-        return render(req, 'tiket/form_tiket.html', {"form":form})
+###################################################
+#                   USER CLASS VIEW
+###################################################
+class UserListView(ListView):
+    model = CustomUserModel
+    template_name = "user/list_user.html"
+    context_object_name = "list_user"
     
-    def post(self, req, *args, **kwargs):
-        if False:
-            pass
+    def get_queryset(self):
+        qs = super().get_queryset()
+        for user in qs:
+            try:
+                user.role_label = RoleEnum(user.role).name.replace("_", "").title()
+            except ValueError:
+                user.role_label = "Unknown"
+        return qs
+        # return super().get_queryset()
+    
+class UserCreateView(CreateView):
+    model = CustomUserModel
+    template_name = "user/user_form.html"
+    form_class = UserForm
+    http_method_names = ["get", "post"]
+    success_url = reverse_lazy("user-list")
+    
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["action"] = "add"
+        print("Get context")
+        return context
+    
+    # def get_form_kwargs(self):
+    #     kwargs = super().get_form_kwargs()
+    #     kwargs["roles"] = [(r.value, r.name.replace("_", " ").title()) for r in RoleEnum][1:]
+    #     print("set kwargs")
+    #     return kwargs
+
+
+class UserUpdateView(UpdateView):
+    model = CustomUserModel
+    template_name = "user/user_form.html"
+    form_class = UserForm
+    http_method_names = ["get", "post"]
+    success_url = reverse_lazy("user-list")
+    
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context["form"] = self.form_class(instance=self.object)
+        context["action"] = "update" 
+        return context
+
+class UserDeleteView(DeleteView):
+    model = CustomUserModel
+    template_name = "user/list_user.html"
+    success_url = reverse_lazy("user-list")
+    
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        obj = self.get_object()
+        context = super().get_context_data(**kwargs)
+        context = context_modal_delete(context, "Hapus User", f"Apakah anda yakin ingin menghapus {obj.username}?", f"/user/{obj.id}/delete", "/user") 
+        return context
+
+    
+    def delete(self, request, *args, **kwargs):
+        obj = self.get_object()
+        # Validasi goes here
+        if obj.id == request.user.user_id:
+            messages.error(request, "TIdak dapat menghapus akun milik sendiri")
+        elif obj.role == RoleEnum.diretur.value:
+            messages.error(request, "Tidak dapat menghapus user dengan role direktur")
         else:
-            form_val = TiketForm(req.POST)
-            if form_val.is_valid():
-                tiket = form_val.save(commit=False)
-                tiket.save()
-                messages.success(req,"Tiket berhasil dibuat")
-                return redirect("/tiket")
-                
-    def put(self, req, *args, **kwargs):
-        pass
-    
-    def delete(self, req, *args, **kwargs):
-        pass
+            super().delete(request, *args, **kwargs)
+        
+        return reverse_lazy('user-list')
+        

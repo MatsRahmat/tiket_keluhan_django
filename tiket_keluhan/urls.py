@@ -4,13 +4,18 @@ from tiket_keluhan import views
 # from tiket_keluhan.view.auth_view import AuthView
 from tiket_keluhan.views import (
     AuthView,
-    # TiketView,
-    # TIKET
+    # =========== TIKET ===========
     TiketListView,
     TiketCreateView,
     TiketUpdateView,
     TiketDetailView,    
     TiketDeleteView,
+    
+    # =========== USER ===========
+    UserListView,
+    UserCreateView,
+    UserUpdateView,
+    UserDeleteView
     
 )
 
@@ -26,4 +31,8 @@ urlpatterns = [
     path('tiket/<int:pk>/delete', TiketDeleteView.as_view(), name="delete-tiket"),
     
     # ================================ TIKET ================================
+    path('user', UserListView.as_view(), name="user-list"),
+    path('user/add', UserCreateView.as_view(), name="user-create"),
+    path('user/<int:pk>/edit', UserUpdateView.as_view(), name="user-edit"),
+    path('user/<int:pk>/delete', UserDeleteView.as_view(), name="user-delete"),
 ]
