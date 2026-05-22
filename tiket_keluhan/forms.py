@@ -16,9 +16,10 @@ class AuthForm(forms.Form):
         }
     
 class TiketForm(forms.ModelForm):
+    file = forms.FileField(widget=forms.ClearableFileInput(attrs={"class": "form-control", "required": False}))
     class Meta:
         model = TiketModel
-        fields = ['login_id','subject', 'description']
+        fields = ['login_id','subject', 'description', 'file']
         widgets = {
             "login_id": forms.TextInput(attrs={"class": "form-control"}),
             "subject": forms.TextInput(attrs={"class": "form-control"}),
@@ -29,11 +30,11 @@ class TiketForm(forms.ModelForm):
 class UserForm(forms.ModelForm):
     class Meta:
         model = CustomUserModel
-        fields = ['login_id','username', 'password', 'role']
+        fields = ['login_id','username', 'role']
         widgets = {
             'login_id': forms.TextInput(attrs={"class": "form-control"}),
             'username': forms.TextInput(attrs={"class": "form-control"}),
-            'password': forms.PasswordInput(attrs={"class": "form-control"}),
+            # 'password': forms.PasswordInput(attrs={"class": "form-control"}),
             'role': forms.Select(attrs={"class": "form-control"}, choices=[(r.value, r.name.replace("_", " ").title()) for r in RoleEnum][1:]),
         }
     

@@ -1,4 +1,5 @@
-import json
+import json, os, uuid
+from datetime import date
 from typing import Any
 from django.views import View
 from django.views.generic import (
@@ -31,6 +32,14 @@ from tiket_keluhan.enums import (
 from tiket_keluhan.models import (
     TiketModel,
     CustomUserModel,
+    TiketAttachmentModel,
+)
+
+from tiket_keluhan.services import (
+    getTiketAsDirektur
+    ,getTiketAsNasabah
+    ,getTiketAsOperator
+    ,getTiketAsPikahKetiga
 )
 
 # ============================================
@@ -38,6 +47,8 @@ from tiket_keluhan.models import (
 # ============================================
 
 __title = {mesg.name: mesg.value for mesg in MesgTitleEnum}
+
+MAX_FILE_SIZE = 5 * 1024 * 1024
 
 class MesgTitle:
     SUCCESS = "Berhasil"
@@ -60,6 +71,7 @@ def logout_view(req: request):
     logout(req)
     return redirect("/login")
 
+@login_required(login_url="/login")
 def tiket_update_delete(req, id):
     action = req.GET.get("action")
     if action == "edit":
@@ -85,10 +97,10 @@ class AuthView(View):
         return render(req, 'auth/login.html',)
 
     def post(self, req, *args, **kwargs):
-        login_as = req.POST.get('login_as')
-        login_id = req.POST.get('login_id')
-        user_id = req.POST.get('user_id')
-        password = req.POST.get('password')
+        login_as    = req.POST.get('login_as')
+        login_id    = req.POST.get('login_id')
+        # user_id     = req.POST.get('user_id')
+        password    = req.POST.get('password')
         
         # ===== Validasi value ======
         if not login_id:
@@ -106,13 +118,17 @@ class AuthView(View):
             return redirect('/login')
             
         context = {}
+        # print("Sudah disini, tinggal authenticate")
         user = authenticate(req,login_id=login_id, password=password)
+        # print("Success auth")
         if user:
             login(req, user)
             req.session['username'] = user.username
-            req.session['user_id'] = user.id
+            req.session['user_id']  = user.id
             req.session['login_id'] = user.login_id
+            req.session['role']     = user.role
             req.session["is_login"] = True
+            
             messages.success(req,"Berhasil login")
             return redirect("/", context)
         else:
@@ -124,78 +140,150 @@ class AuthView(View):
 #                   TIKET CLASS VIEW
 ###################################################
 
-class TiketListView(ListView):
+class TiketListView(LoginRequiredMixin,ListView):
+    """Not Used"""
     model = TiketModel
-    template_name = "/"
+    template_name = "home/index.html"
+    
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        login_id = self.request.session.get("login_id")
+        role = self.request.session.get("role")
+        
+        print(f"Role: {role}")
+        if role == RoleEnum.nasabah.value:
+            # Ketika user = nasabah
+            context["tickets"] = getTiketAsNasabah(login_id)
+            pass
+        elif role in (RoleEnum.operator.value, RoleEnum.diretur.value) :
+            # ketika operation user login
+            pass
+        elif role == RoleEnum.staff.value:
+            # ketika staff internal
+            pass
+        elif role == RoleEnum.pihak_ketiga.value:
+            # ketika pihak ke-3 
+            pass
+        else:
+            print("Role tidak valid")
+            context["tickets"] = []
+            
+            pass
+        
+        # context[""] = None
+        return context
+    
 
 class TiketDetailView(LoginRequiredMixin,DetailView):
-    model = TiketModel
-    form_class = TiketForm
-    template_name="tiket/form_tiket.html"
+    model           = TiketModel
+    form_class      = TiketForm
+    template_name   ="tiket/form_tiket.html"
+    login_url       = "login"  # Fallback url ketika belum login
     
     # Untuk menampilkan form dan mengisinya dengan data yg didapat
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
         context["form"] = self.form_class(instance=self.object) 
         context["action"] = "update"
+        # print(self.object)
+        attachment = getattr(self.object, "attachment", None)
+        if attachment:
+            context["attachment"] = attachment
         return context
-    
     
 class TiketCreateView(CreateView):
-    model = TiketModel
-    form_class = TiketForm
-    template_name ="tiket/form_tiket.html"
-    success_url = reverse_lazy("home")
+    model           = TiketModel
+    form_class      = TiketForm
+    template_name   ="tiket/form_tiket.html"
+    success_url     = reverse_lazy("home")
     
     def form_valid(self, form):
-        messages.success(self.request, "Tiket berhasil dibuat")
         response = super().form_valid(form)
-        
-        # self.extra_context = show_toast_2(MesgTitle.SUCCESS, "Tiket berhasil dibuat")
-        return super().form_valid(form)
+        messages.success(self.request, "Tiket berhasil dibuat")
+        file = self.request.FILES.get('file')
+        if file:
+            # validasi file size
+            if file.size > MAX_FILE_SIZE:
+                form.add_error('file', 'Maximum file size adalah 5MB')
+                return self.form_invalid(form)
+            
+            ext = os.path.splitext(file.name)[1].lower()
+            allowed_ext = ['.png','.jpg','.jpeg']
+            if ext not in allowed_ext:
+                form.add_error('file', 'Extensi file tidak sesuai, hanya untuk PNG,JPG,JPEG')
+                return self.form_invalid(form)
+            
+            today = date.today().strftime("%Y%m%d")
+            new_name = f"{today}-{uuid.uuid4().hex}{ext}"
+            
+            TiketAttachmentModel.objects.create(
+                tiket=self.object,
+                file=file,
+                # original_name=file.name,
+                sotred_name=new_name
+                )
+        #TODO: validasi apakah sudah login, jika sudah, maka redirect ke home, apabila belum makan ada halaman khusus nya
+        return response
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        # if not context:
-        #     context = {}
-        # context["action"] = "add"
-        
-        # if hasattr(self, "extra_context") and self.extra_context:
-        #     context.update(self.extra_context)
         return context
     
-    
 class TiketUpdateView(LoginRequiredMixin,UpdateView):
-    model = TiketModel
-    fields = ['login_id','subject', 'description']
-    template="tiket/form_tiket.html"
-    # success_url = redirect(to="", permanent=True)
+    model       = TiketModel
+    fields      = ['login_id','subject', 'description']
+    template    ="tiket/form_tiket.html"
     success_url = reverse_lazy("home")
+    login_url   = "login" # Fallback url ketika belum login
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
-        # if not context:
-        #     context = {}
-        
         context["action"] = "update"
-    
-        # if hasattr(self, "extra_context") and self.extra_context:
-        #     print(self.extra_context)
-        #     context.update(self.extra_context)
-        # print(context)
         return context
     
     def form_valid(self, form):
         response = super().form_valid(form)
         messages.success(self.request, "Tiket berhasil di ubah")
-        # self.extra_context = show_toast_2(MesgTitle.SUCCESS, "Tiket berhasil di ubah")
+        file = self.request.FILES.get("file")
+        attachment = getattr(self.object, "attachment")
+        if file:
+            print("File baru ditemukan")
+            # validasi file size
+            if file.size > MAX_FILE_SIZE:
+                form.add_error('file', 'Maximum file size adalah 5MB')
+                return self.form_invalid(form)
+            
+            ext = os.path.splitext(file.name)[1].lower()
+            allowed_ext = ['.png','.jpg','.jpeg']
+            if ext not in allowed_ext:
+                form.add_error('file', 'Extensi file tidak sesuai, hanya untuk PNG,JPG,JPEG')
+                return self.form_invalid(form)
+            
+            today = date.today().strftime("%Y%m%d")
+            new_name = f"{today}-{uuid.uuid4().hex}{ext}"
+            
+            if attachment:
+                attachment.file = file
+                attachment.original_name = file.name
+                attachment.stored_name = new_name
+                attachment.save()
+            else:
+                TiketAttachmentModel.objects.create(
+                    tiket=self.object,
+                    file=file,
+                    sotred_name=new_name, # original name handle by model save method
+                )
+        else:
+            pass
+            print("File tidak berubah")
+            
         return response
     
-    
 class TiketDeleteView(LoginRequiredMixin,DeleteView):
-    model = TiketModel
-    template_name = "confirm/delete.html"
-    success_url = reverse_lazy("home")
+    model           = TiketModel
+    template_name   = "confirm/delete.html"
+    success_url     = reverse_lazy("home")
+    login_url       = "login" # Fallback url ketika belum login
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -218,9 +306,10 @@ class TiketDeleteView(LoginRequiredMixin,DeleteView):
 #                   USER CLASS VIEW
 ###################################################
 class UserListView(LoginRequiredMixin,ListView):
-    model = CustomUserModel
-    template_name = "user/list_user.html"
+    model               = CustomUserModel
+    template_name       = "user/list_user.html"
     context_object_name = "list_user"
+    login_url           = "login" # Fallback url ketika belum login
     
     def get_queryset(self):
         qs = super().get_queryset()
@@ -233,11 +322,12 @@ class UserListView(LoginRequiredMixin,ListView):
         # return super().get_queryset()
     
 class UserCreateView(LoginRequiredMixin,CreateView):
-    model = CustomUserModel
-    template_name = "user/user_form.html"
-    form_class = UserForm
-    http_method_names = ["get", "post"]
-    success_url = reverse_lazy("user-list")
+    model               = CustomUserModel
+    template_name       = "user/user_form.html"
+    form_class          = UserForm
+    http_method_names   = ["get", "post"]
+    success_url         = reverse_lazy("user-list")
+    login_url           = "login" # Fallback url ketika belum login
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -252,11 +342,12 @@ class UserCreateView(LoginRequiredMixin,CreateView):
     #     return kwargs
 
 class UserUpdateView(LoginRequiredMixin,UpdateView):
-    model = CustomUserModel
-    template_name = "user/user_form.html"
-    form_class = UserForm
-    http_method_names = ["get", "post"]
-    success_url = reverse_lazy("user-list")
+    model               = CustomUserModel
+    template_name       = "user/user_form.html"
+    form_class          = UserForm
+    http_method_names   = ["get", "post"]
+    success_url         = reverse_lazy("user-list")
+    login_url           = "login" # Fallback url ketika belum login
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -265,9 +356,10 @@ class UserUpdateView(LoginRequiredMixin,UpdateView):
         return context
 
 class UserDeleteView(LoginRequiredMixin,DeleteView):
-    model = CustomUserModel
+    model         = CustomUserModel
     template_name = "user/list_user.html"
-    success_url = reverse_lazy("user-list")
+    success_url   = reverse_lazy("user-list")
+    login_url     = "login" # Fallback url ketika belum login
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         obj = self.get_object()

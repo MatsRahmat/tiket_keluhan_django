@@ -20,7 +20,8 @@ from tiket_keluhan.views import (
 )
 
 urlpatterns = [
-    path("", views.index, name="home"),
+    # path("", views.index, name="home"),
+    path("", TiketListView.as_view(), name="home"),
     path("login", AuthView.as_view(), name="login"),
     path("logout", views.logout_view, name="logout"),
     

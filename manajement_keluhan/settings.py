@@ -110,6 +110,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'tiket_keluhan.auth_backend.DualLogin',
+]
+
 # Auth
 LOGIN_URL = "/login"
 LOGOUT_REDIRECT_URL = "/"
@@ -140,6 +145,10 @@ SESSION_SAVE_EVERY_REQUEST=True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
+# untuk aset static seperti javascript, css & asset icon dll
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
-# STATIC_ROOT = BASE_DIR / 'static'
+
+# untuk media file atau file yg diupload oleh user
+MEDIA_URL = "media/"
+MEDIA_ROOT= BASE_DIR / "media"

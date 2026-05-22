@@ -5,7 +5,7 @@ class RoleEnum(Enum):
     operator = 2
     staff = 3
     pihak_ketiga =4
-    klien = 5
+    nasabah = 6
     
     
 class MesgTitleEnum(Enum):
@@ -13,3 +13,10 @@ class MesgTitleEnum(Enum):
     FAILED  = "Gagal"
     WARNING = "Peringatan"
 
+
+class TiketStatusEnum(Enum):
+    SENT = "sent"
+    APPROVED = "approved"
+    ON_PROGRES="on progres"
+    DONE    = "done"
+    REJECT  = "reject"
