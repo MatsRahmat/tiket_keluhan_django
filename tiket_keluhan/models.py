@@ -86,3 +86,43 @@ class TiketAttachmentModel(models.Model):
     
     def __str__(self):
         return self.original_name
+
+
+# ==================================
+#            TIKET ACTION
+# ==================================  
+class TiketActionModel(models.Model):
+    tiket = models.ForeignKey(TiketModel, on_delete=models.CASCADE, related_name="actions")
+    aktor = models.ForeignKey(CustomUserModel, on_delete=models.SET_NULL, null=True, related_name='actions_actor')
+    action_type = models.CharField('action type',max_length=50)
+    note = models.TextField('note',blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.tiket.no_tiket} - {self.action_type}"
+    
+
+# ==================================
+#         TIKET REVIEWER
+# ==================================      
+class ReviewerModel(models.Model):
+    tiket = models.ForeignKey(TiketModel, on_delete=models.CASCADE, related_name='reviews')
+    reviewer = models.ForeignKey(CustomUserModel, on_delete=models.SET_NULL, null=True, related_name="given_reviews")
+    evaluation = models.TextField()
+    rating = models.PositiveSmallIntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+     
+    def __str__(self):
+        return f"{self.tiket.no_tiket} - {self.reviewer.username}"
+    
+    
+# ==================================
+#           TIKET HISTORY
+# ==================================  
+class TiketStatusHistory(models.Model):
+    tiket = models.ForeignKey(TiketModel, on_delete=models.CASCADE, related_name="status_history")
+    changed_by = models.ForeignKey(CustomUserModel, on_delete=models.SET_NULL, null=True, related_name="status_change")
+    timestamp = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.tiket.no_tiket} - {self.timestamp}"
