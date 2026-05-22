@@ -10,20 +10,10 @@
       <h4 class="text-center">Login</h4>
       <form class="" action="{% url 'login' %}" method="post">
         {% csrf_token %}
-        <div class="mb-2">
-          <label for="login_id" class="form-label">Login Sebagai</label>
-          <select name="login_as" id="login_as" class="form-select">
-            <option value="1" selected>Nasabah</option>
-            <option value="2">Operator</option>
-          </select>
-        </div>
+        
         <div class="">
           <label for="login_id" class="form-label">Login Id</label>
           <input type="text" id="login_id" name="login_id" class="form-control" required />
-        </div>
-        <div class="" id="user_id_el">
-          <label for="user_id" class="form-label">User Id</label>
-          <input type="text" id="user_id" name="user_id" class="form-control" />
         </div>
         <div class="" id="password_el">
           <label for="password_field" class="form-label">Password</label>
@@ -38,7 +28,7 @@
 {% endblock %}
 
 {% block script %}
-  <script id="login-page">
+  {% comment %} <script id="login-page">
     $(document).ready(function (e) {
       // ============== Global Page Definition ===============
     
@@ -80,5 +70,5 @@
         }
       })
     })
-  </script>
+  </script> {% endcomment %}
 {% endblock %}

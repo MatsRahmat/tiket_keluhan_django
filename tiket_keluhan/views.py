@@ -90,50 +90,59 @@ def tiket_update_delete(req, id):
 ###################################################
 class AuthView(View):
     def get(self, req, *args, **kwargs):
-        login_session = req.session.get("login_id")
+        login_session = req.session.get("is_login")
         if login_session is not None:
             messages.success(req, "Sudah berhasil login")
             return redirect("/")
-        return render(req, 'auth/login.html',)
-
+        form = AuthForm()
+        print(form)
+        return render(req, 'auth/login.html',{ form: form })
+    
     def post(self, req, *args, **kwargs):
-        login_as    = req.POST.get('login_as')
-        login_id    = req.POST.get('login_id')
-        # user_id     = req.POST.get('user_id')
-        password    = req.POST.get('password')
+        # form = AuthForm(req.POST)
+        login_id = req.POST.get("login_id", None)
+        password = req.POST.get("password", None)
         
-        # ===== Validasi value ======
-        if not login_id:
-            messages.error(req, "Login ID diperlukan")
-            return redirect('/login')
+        if login_id and password:
+            context = {}
+            user = authenticate(req,login_id=login_id, password=password)
+            if user:
+                login(req, user)
+                req.session['username'] = user.username
+                req.session['user_id']  = user.id
+                req.session['login_id'] = user.login_id
+                req.session['role']     = user.role
+                req.session["is_login"] = True
+                
+                messages.success(req,"Berhasil login")
+                return redirect("/", context)
+            else:
+                messages.error(req,"Password atau login id salah")
+                return redirect("/login", context)
         
-        # Login sebagai nasabah
-        if login_as == '1' and not user_id:
-            messages.error(req, "User Id diperlukan")
-            return redirect('/login')
+        messages.error(req,"Password atau login_id diperlukan")
+        return redirect("/login", context)
+        # login_as    = req.POST.get('login_as')
+        # login_id    = req.POST.get('login_id')
+        # # user_id     = req.POST.get('user_id')
+        # password    = req.POST.get('password')
         
-        # Login sebagai operator
-        elif login_as == '2' and not password:
-            messages.error(req, "Password diperlukan")
-            return redirect('/login')
+        # # ===== Validasi value ======
+        # if not login_id:
+        #     messages.error(req, "Login ID diperlukan")
+        #     return redirect('/login')
+        
+        # # Login sebagai nasabah
+        # if login_as == '1' and not user_id:
+        #     messages.error(req, "User Id diperlukan")
+        #     return redirect('/login')
+        
+        # # Login sebagai operator
+        # elif login_as == '2' and not password:
+        #     messages.error(req, "Password diperlukan")
+        #     return redirect('/login')
             
-        context = {}
-        # print("Sudah disini, tinggal authenticate")
-        user = authenticate(req,login_id=login_id, password=password)
-        # print("Success auth")
-        if user:
-            login(req, user)
-            req.session['username'] = user.username
-            req.session['user_id']  = user.id
-            req.session['login_id'] = user.login_id
-            req.session['role']     = user.role
-            req.session["is_login"] = True
-            
-            messages.success(req,"Berhasil login")
-            return redirect("/", context)
-        else:
-            messages.error(req,"Password atau login id salah")
-            return redirect("/login", context)
+        
         
                 
 ###################################################
