@@ -5,6 +5,7 @@ from tiket_keluhan import views
 from tiket_keluhan.views import (
     AuthView,
     DashboardView,
+    TiketSubmitStatus,
     # =========== TIKET ===========
     TiketListView,
     TiketCreateView,
@@ -26,9 +27,12 @@ urlpatterns = [
     path("login", AuthView.as_view(), name="login"),
     path("logout", views.logout_view, name="logout"),
     
+    # ================================ REDIREC ================================
+    path('action-message', TiketSubmitStatus.as_view(), name='message'),
+    
     # ================================ TIKET ================================
     path('tiket', TiketListView.as_view(), name="list-tiket"),
-    path('tiket/create', TiketCreateView.as_view(), name="create-tiket"),
+    path('new-tiket', TiketCreateView.as_view(), name="create-tiket"), # un-auth page
     path('tiket/<int:pk>/edit', TiketDetailView.as_view(), name="edit-tiket"),
     path('tiket/<int:pk>/update', TiketUpdateView.as_view(), name="update-tiket"),
     path('tiket/<int:pk>/delete', TiketDeleteView.as_view(), name="delete-tiket"),

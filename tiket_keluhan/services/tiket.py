@@ -11,20 +11,20 @@ def getTiketAsNasabah(login_id) -> Union[None, _ListTiket]:
     return tiket_nasabah
 
 def getTiketAsOperator(*,
-                       end_date: Optional[date]
-                       ,start_date: Optional[date]
-                       ,login_id: Optional[str]
-                       ,tiket_no: Optional[str]
-                       ,status: Optional[str]
+                       end_date: Optional[date] = None
+                       ,start_date: Optional[date] = None
+                       ,login_id: Optional[str] = None
+                       ,tiket_no: Optional[str] = None
+                       ,status: Optional[str] = None
                        ) -> Union[None, _ListTiket]:
     """
     Get tiket data as operator or direcktur
     """
     
     qr = _TiketModel.objects.all()
-
+    
     if status:
-        qr = qt.filter(status=status)
+        qr = qr.filter(status=status)
     
     if end_date and start_date:
         qr = qr.filter(created_at__range=(start_date,end_date))
@@ -32,9 +32,8 @@ def getTiketAsOperator(*,
     if login_id:
         qr = qr.filter(login_id=login_id)
 
-    if tiket_no: 
+    if tiket_no:
         qr = qr.filter(no_tiket=tiket_no)
-    
     
     return qr.order_by('-created_at')
 

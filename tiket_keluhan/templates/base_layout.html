@@ -13,7 +13,7 @@
         --c-teal-400: oklch(77.7% 0.152 181.912);
         --c-slate-300: oklch(86.9% 0.022 252.894);
         --c-slate-200: oklch(96.8% 0.007 247.896);
-        --c-slate-100: oklch(96.8% 0.007 247.896)
+        --c-slate-100: oklch(96.8% 0.007 247.896);
       }
       
       @keyframes slideOutRight {
@@ -30,6 +30,7 @@
         text-align: center;
       }
     </style>
+
     <title>
       {% block title %}
         Tiket Keluhan
@@ -46,20 +47,23 @@
           <p class="p-0 m-0">{{ request.user.login_id }}</p>
           <a href="{% url 'logout' %}" role="button" class="btn border-light text-light">Logout</a>
           {% else %}
-          <a href="{% url 'login' %}" role="button" class="btn btn-primary border-light">Login</a>
+          <div class="d-flex gap-2 align-items-center">
+            <a href="{% url 'create-tiket' %}" class="text-white">Create new Tiket</a>
+            <a href="{% url 'login' %}" role="button" class="btn btn-primary border-light">Login</a>
+          </div>
           {% endif %}
         </div>
       </div>
     </nav>
 
-    <div class="container-fluid" style="height: calc(98dvh - 58.5px);">
+    <div class="container-fluid" style="height: calc(98dvh - 5rem);">
     {% block base_content %}
       <!-- Base Content goes here -->
     {% endblock base_content %}
   </div>
 
     {% comment %}================ Toastify ================{% endcomment %}
-    <div id="toas-container" class="p-3" style="position: fixed; top: 0; right: 0; animation: slideOutRight 0.5s ease forwards;" {% if not messages %}hidden{% endif %}>
+    <div id="toas-container" class="p-3" style="position: fixed; top: 0; right: 0; animation: slideOutRight 0.5s ease forwards;" {% if not messages %} hidden {% endif %} >
       <div id="toas-mesg" class="p-2 rounded-3 alert" style="max-width: 24rem; cursor: pointer; border: #000; background: var(--c-sky-200);" title="Close">
         <div class="d-flex justify-content-between gap-2">
           <h4 class="text-truncate">Alert</h4>

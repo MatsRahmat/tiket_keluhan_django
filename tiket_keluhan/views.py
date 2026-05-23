@@ -1,5 +1,5 @@
 import json, os, uuid
-from datetime import date
+from datetime import date, timedelta
 from typing import Any
 from django.views import View
 from django.views.generic.base import TemplateView
@@ -24,6 +24,7 @@ from tiket_keluhan.utils import (
     show_toast_2,
     context_modal_delete,
     str_into_date,
+    str_into_datetime
 )
 
 from tiket_keluhan.enums import (
@@ -51,6 +52,8 @@ from tiket_keluhan.services import (
 __title = {mesg.name: mesg.value for mesg in MesgTitleEnum}
 
 MAX_FILE_SIZE = 5 * 1024 * 1024
+
+HTML_DATE_FORMAT = "%Y-%m-%d"
 
 class MesgTitle:
     SUCCESS = "Berhasil"
@@ -108,6 +111,8 @@ class AuthView(View):
             context = {}
             user = authenticate(req,login_id=login_id, password=password)
             if user:
+                print("Auth user")
+                print(user)
                 login(req, user)
                 req.session['username'] = user.username
                 req.session['user_id']  = user.id
@@ -142,7 +147,7 @@ class AuthView(View):
         # elif login_as == '2' and not password:
         #     messages.error(req, "Password diperlukan")
         #     return redirect('/login')
-            
+        
 
 ###################################################
 #                   DASHBOARD CLASS VIEW
@@ -159,57 +164,120 @@ class DashboardView(LoginRequiredMixin,TemplateView):
         # TODO: Memuat data summary dan statistik dari tiket yg ada 
         return context
     
+    
+class TiketSubmitStatus(TemplateView):
+    template_name = 'ui/message.html'
+    
                 
 ###################################################
 #                   TIKET CLASS VIEW
 ###################################################
 
 class TiketListView(LoginRequiredMixin,ListView):
-    model = TiketModel
+    # model = TiketModel
+    context_object_name = "tickets"
     template_name = "tiket/index.html"
     
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        login_id = self.request.session.get("login_id")
+    def get_queryset(self):
         role = self.request.session.get("role")
         
         # ============== Param ==============
-        login_id = self.request.GET.get("login_id", None)
-        tiket_no = self.request.GET.get("tiket_no", None)
-        status = self.request.GET.get("status", None)
+        login_id = self.request.GET.get("login_id", "")
+        tiket_no = self.request.GET.get("tiket_no", "")
+        status = self.request.GET.get("status", "")
         
         # * Parse kedalam format date
-        start_date = str_into_date(self.request.GET.get("start_date", None))
-        end_date = str_into_date(self.request.GET.get("end_date", None))
+        start_date = str_into_datetime(self.request.GET.get("start_date", None), HTML_DATE_FORMAT)
+        end_date = str_into_datetime(self.request.GET.get("end_date", None), dt_format=HTML_DATE_FORMAT, is_end=True)
         
-        print(f"Role: {role}")
+        # print(f"Start date {start_date} end date {end_date}")
+        # print(f"Raw start_date {self.request.GET.get("start_date", None)} raw end_date {self.request.GET.get("end_date", None)}")
+        tikets = []        
         if role == RoleEnum.nasabah.value:
             # Ketika user = nasabah
-            context["tickets"] = getTiketAsNasabah(login_id)
+            print("Masuk nasabah")
+            tikets = getTiketAsNasabah(login_id)
             pass
         elif role in (RoleEnum.operator.value, RoleEnum.diretur.value) :
             # ketika operation user login
-            context["tickets"] = getTiketAsOperator(login_id=login_id, tiket_no=tiket_no, start_date=start_date, end_date=end_date)
+            tikets = getTiketAsOperator(status=status, tiket_no=tiket_no, start_date=start_date, end_date=end_date)
+            # print(tikets)
+            # print("Masuk operator & direktur")
             pass
         elif role == RoleEnum.staff.value:
             # ketika staff internal
+            # print("Masuk staff")
             pass
         elif role == RoleEnum.pihak_ketiga.value:
             # ketika pihak ke-3 
+            # print("Masuk pihak ke3")
             pass
         else:
-            print("Role tidak valid")
-            context["tickets"] = []
-            
+            # print("Role tidak valid")
             pass
         
+        print(tikets)
+        return tikets
+    
+    
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        # login_id = self.request.session.get("login_id")
+        # role = self.request.session.get("role")
+        
+        # # ============== Param ==============
+        # login_id = self.request.GET.get("login_id", "")
+        # tiket_no = self.request.GET.get("tiket_no", "")
+        # status = self.request.GET.get("status", "")
+        # start_date = str_into_date(self.request.GET.get("start_date", None), HTML_DATE_FORMAT)
+        # end_date = str_into_date(self.request.GET.get("end_date", None), HTML_DATE_FORMAT)
+        
         context["filter"] = {
-            "start_date": start_date,
-            "end_date": end_date,
-            "tiket_no": tiket_no,
-            "login_id": login_id,
-            "status": status
+            "start_date": self.request.GET.get("start_date", ""),
+            "end_date": self.request.GET.get("end_date", ""),
+            "tiket_no": self.request.GET.get("tiket_no", ""),
+            "status": self.request.GET.get("status", "")
         }
+        
+        # # * Parse kedalam format date
+        
+        # print(f"Start date {start_date} end date {end_date}")
+        # print(f"Raw start_date {self.request.GET.get("start_date", None)} raw end_date {self.request.GET.get("end_date", None)}")
+        
+        # print(f"Role: {type(role)} enum: f{type(RoleEnum.diretur.value)}")
+        # if role == RoleEnum.nasabah.value:
+        #     # Ketika user = nasabah
+        #     print("Masuk nasabah")
+        #     context["tickets"] = getTiketAsNasabah(login_id)
+        #     pass
+        # elif role in (RoleEnum.operator.value, RoleEnum.diretur.value) :
+        #     # ketika operation user login
+        #     tikets = getTiketAsOperator(status=status, tiket_no=tiket_no, start_date=start_date, end_date=end_date)
+        #     print(tikets)
+        #     context["tickets"] = tikets
+        #     print("Masuk operator & direktur")
+        #     pass
+        # elif role == RoleEnum.staff.value:
+        #     print("Masuk staff")
+        #     # ketika staff internal
+        #     pass
+        # elif role == RoleEnum.pihak_ketiga.value:
+        #     print("Masuk pihak ke3")
+        #     # ketika pihak ke-3 
+        #     pass
+        # else:
+        #     print("Role tidak valid")
+        #     context["tickets"] = []
+            
+        #     pass
+            
+        # all_tikets = TiketModel.objects.count()
+        # print("Tiket count is %d " % all_tikets)
+        
+        
+
+        
+        # print(context)
         return context
     
 

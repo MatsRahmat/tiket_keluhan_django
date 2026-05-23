@@ -1,0 +1,15 @@
+{% extends 'base_layout.html' %}
+
+
+{% block base_content %}
+
+<div class="container d-flex justify-content-center align-items-center" style="height: 100%;">
+    <div>
+        {% if messages %}
+        <h2> {{ messages[0] }} </h2>
+        {% endif %}
+    </div>
+
+</div>
+
+{% endblock base_content %}
