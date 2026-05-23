@@ -47,7 +47,7 @@
           <p class="p-0 m-0">{{ request.user.login_id }}</p>
           <a href="{% url 'logout' %}" role="button" class="btn border-light text-light">Logout</a>
           {% else %}
-          <div class="d-flex gap-2 align-items-center">
+          <div class="d-flex gap-3 align-items-center">
             <a href="{% url 'create-tiket' %}" class="text-white">Create new Tiket</a>
             <a href="{% url 'login' %}" role="button" class="btn btn-primary border-light">Login</a>
           </div>
@@ -81,7 +81,7 @@
 
     {% comment %}================ Modal Delete ================{% endcomment %}
     {% if is_delete and mesg %}
-    <div style="background: #000; opacity: 0.6; position: fixed; left: 0; right: 0; top: 0; bottom: 0;"></div>
+    <div style="background: #000; opacity: 0.6; position: fixed; left: 0; right: 0; top: 0; bottom: 0;" class="hidden"></div>
     <div style="position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%);">
       <div class="d-flex justify-content-center align-items-center" style="height: 90dvh;">
         <form action="{{ delete_url }}" method="POST" class="border border-dark p-2 rounded-3 bg-light" style="max-width: 70dvw;">
@@ -96,6 +96,22 @@
       </div>
     </div>
     {% endif %}
+
+    {% comment %}================ Modal Delete 2 ================{% endcomment %}
+    <div style="background: #000; opacity: 0.6; position: fixed; left: 0; right: 0; top: 0; bottom: 0; display: none;" id="modal-overlay"></div>
+    <div style="position: fixed; left: 50%; top: 50%; transform: translate(-50%,-50%); display: none;" id="modal-body">
+      <div class="d-flex justify-content-center align-items-center" style="height: 90dvh;">
+        <form action="" method="POST" class="border border-dark p-2 rounded-3 bg-light" style="max-width: 70dvw;">
+          {% csrf_token %}
+          <h4 id="modal-title">Modal Title</h4>
+          <p id="modal-mesg">Modal Message</p>
+          <div class="d-flex justify-content-between gap-2">
+            <button class="btn btn-primary border" style="width: 100%;" type="submit">Ya</button>
+            <button type="button" class="btn btn-light border" style="width: 100%;" id="btn-modal-cancel">Tidak</button>
+          </div>
+        </form>
+      </div>
+    </div>
 
     {% comment %}bootstrap bundle{% endcomment %}
     <script src="{% static 'js/bootstrap.bundle.js' %}"></script>
@@ -118,13 +134,45 @@
       // =============== ON READY DOCUMENT ===============
       $(document).ready(function () {
         console.log("I'm ready")
-      
+
+        // =============== CUSTOM TOASTIFY ===================
         $('#toas-container').on('click', closeToastModal)
-      
+        
         if (!$('#toas-container').attr('hidden')) {
           // untuk auto close modal message nya ketika sudah 5 detik
           timerTimeout = setTimeout(closeToastModal, DEFAULT_TIMEOUT)
         }
+        
+        // =============== MODAL ===================
+        const modalOverlay = $("#modal-overlay")
+        const modalBody = $("#modal-body")
+
+        modalBody.find('#btn-modal-cancel').on('click', function(){
+          modalBody.hide()
+          modalOverlay.hide();
+        })
+
+        //* Initial hide modal nya
+        modalOverlay.hide()
+        modalBody.hide()
+
+        // Custom attribut data untuk trigger delete data
+        $("[data-delete]").on('click', function(e){
+          const detailId = $(this).attr("data-delete")
+          const deleteUrl = $(this).attr("data-delete-url")
+          const deleteMesg = $(this).attr("data-delete-mesg")
+
+          const modalForm = modalBody.find('form')
+          modalBody.find('#modal-title').text('Delete')
+          modalBody.find('#modal-mesg').text(deleteMesg)
+          modalForm.attr('action',deleteUrl)
+          // modalForm.attr('method', 'DELETE')
+
+          modalOverlay.show()
+          modalBody.show()
+
+        });
+
       }) //* End of scope ready function
       
       // =============== CLEAR STATE ===============

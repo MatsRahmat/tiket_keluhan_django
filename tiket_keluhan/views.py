@@ -302,11 +302,10 @@ class TiketCreateView(CreateView):
     model           = TiketModel
     form_class      = TiketForm
     template_name   ="tiket/form_tiket.html"
-    success_url     = reverse_lazy("home")
+    success_url     = reverse_lazy("message")
     
     def form_valid(self, form):
         response = super().form_valid(form)
-        messages.success(self.request, "Tiket berhasil dibuat")
         file = self.request.FILES.get('file')
         if file:
             # validasi file size
@@ -329,7 +328,7 @@ class TiketCreateView(CreateView):
                 # original_name=file.name,
                 sotred_name=new_name
                 )
-        #TODO: validasi apakah sudah login, jika sudah, maka redirect ke home, apabila belum makan ada halaman khusus nya
+        messages.success(self.request, "Tiket Berhasil dibuat")
         return response
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
@@ -389,22 +388,12 @@ class TiketUpdateView(LoginRequiredMixin,UpdateView):
 class TiketDeleteView(LoginRequiredMixin,DeleteView):
     model           = TiketModel
     template_name   = "confirm/delete.html"
-    success_url     = reverse_lazy("home")
+    success_url     = reverse_lazy("list-tiket")
     login_url       = "login" # Fallback url ketika belum login
-    
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        context["is_delete"] = True 
-        context["delete_url"] = f"/tiket/{self.object.id}/delete"
-        context["back_url"] = "/"
-        context["title"] = "Hapus Tiket"
-        context["mesg"] = f"Apakah anda yakin ingin menghapus tiket #{self.object.no_tiket}?"
-        
-        # context = show_toast(context, "Success")
-        
-        return context
+    http_method_names = ['post']
     
     def delete(self, request, *args, **kwargs):
+        print("Success delete tiket")
         messages.success(request, "Berhasil menghapus data")
         return super().delete(request, *args, **kwargs)
 
