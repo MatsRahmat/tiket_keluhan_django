@@ -1,5 +1,5 @@
 import os, uuid
-from datetime import date
+from datetime import date, datetime
 
 def show_toast(ctx:dict, title:str, mesg:str) -> dict:
     if not ctx:
@@ -44,3 +44,17 @@ def custom_upload_path(instance, filename):
 
 def validate_file(file, form):
     pass
+
+
+def str_into_date(date_str) -> date:
+    if not date_str:
+        return None
+    
+    try:
+        dt_obj = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S.%f0")
+    except Exception as e:
+        print("Failed to parse string into date")
+        print(e)
+        return None
+    
+    return dt_obj.date()

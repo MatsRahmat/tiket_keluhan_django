@@ -11,6 +11,9 @@
       :root {
         --c-sky-200: oklch(74.6% 0.16 232.661);
         --c-teal-400: oklch(77.7% 0.152 181.912);
+        --c-slate-300: oklch(86.9% 0.022 252.894);
+        --c-slate-200: oklch(96.8% 0.007 247.896);
+        --c-slate-100: oklch(96.8% 0.007 247.896)
       }
       
       @keyframes slideOutRight {
@@ -49,7 +52,7 @@
       </div>
     </nav>
 
-    <div class="container-fluid">
+    <div class="container-fluid" style="height: calc(98dvh - 58.5px);">
     {% block base_content %}
       <!-- Base Content goes here -->
     {% endblock base_content %}

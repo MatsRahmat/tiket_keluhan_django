@@ -2,8 +2,9 @@ import json, os, uuid
 from datetime import date
 from typing import Any
 from django.views import View
+from django.views.generic.base import TemplateView
 from django.views.generic import (
-    DetailView, UpdateView,ListView, CreateView, DeleteView,
+    DetailView, UpdateView,ListView, CreateView, DeleteView
 )
 from django.urls import reverse_lazy
 from django.shortcuts import render, redirect, get_object_or_404
@@ -22,6 +23,7 @@ from tiket_keluhan.utils import (
     show_toast,
     show_toast_2,
     context_modal_delete,
+    str_into_date,
 )
 
 from tiket_keluhan.enums import (
@@ -95,7 +97,6 @@ class AuthView(View):
             messages.success(req, "Sudah berhasil login")
             return redirect("/")
         form = AuthForm()
-        print(form)
         return render(req, 'auth/login.html',{ form: form })
     
     def post(self, req, *args, **kwargs):
@@ -142,22 +143,44 @@ class AuthView(View):
         #     messages.error(req, "Password diperlukan")
         #     return redirect('/login')
             
+
+###################################################
+#                   DASHBOARD CLASS VIEW
+###################################################
         
-        
+class DashboardView(LoginRequiredMixin,TemplateView):
+    template_name = "home/index.html"
+    login_url = "/login"
+    
+    
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        context[""] = None
+        # TODO: Memuat data summary dan statistik dari tiket yg ada 
+        return context
+    
                 
 ###################################################
 #                   TIKET CLASS VIEW
 ###################################################
 
 class TiketListView(LoginRequiredMixin,ListView):
-    """Not Used"""
     model = TiketModel
-    template_name = "home/index.html"
+    template_name = "tiket/index.html"
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         login_id = self.request.session.get("login_id")
         role = self.request.session.get("role")
+        
+        # ============== Param ==============
+        login_id = self.request.GET.get("login_id", None)
+        tiket_no = self.request.GET.get("tiket_no", None)
+        status = self.request.GET.get("status", None)
+        
+        # * Parse kedalam format date
+        start_date = str_into_date(self.request.GET.get("start_date", None))
+        end_date = str_into_date(self.request.GET.get("end_date", None))
         
         print(f"Role: {role}")
         if role == RoleEnum.nasabah.value:
@@ -166,6 +189,7 @@ class TiketListView(LoginRequiredMixin,ListView):
             pass
         elif role in (RoleEnum.operator.value, RoleEnum.diretur.value) :
             # ketika operation user login
+            context["tickets"] = getTiketAsOperator(login_id=login_id, tiket_no=tiket_no, start_date=start_date, end_date=end_date)
             pass
         elif role == RoleEnum.staff.value:
             # ketika staff internal
@@ -179,7 +203,13 @@ class TiketListView(LoginRequiredMixin,ListView):
             
             pass
         
-        # context[""] = None
+        context["filter"] = {
+            "start_date": start_date,
+            "end_date": end_date,
+            "tiket_no": tiket_no,
+            "login_id": login_id,
+            "status": status
+        }
         return context
     
 

@@ -1,20 +1,26 @@
 {% extends 'base_layout.html' %}
 
 {% block base_content %}
-  <div class="row">
-    <div class="col-1 border-end" style="padding: 0; padding-top: 1.4rem;">
+  <div class="row" style="height: 100%;">
+    {% comment %} Sidebar nav {% endcomment %}
+    <aside class="col-2 border-end" style="padding: 0; padding-top: 1.4rem;">
       <div>
         <p class="fs-5 text-center">Admin Panel</p>
       </div>
       <div class="list-group">
-        <a href="{% url 'home' %}" class="list-group-item list-group-item-action">Tiket</a>
-        <a href="{% url 'user-list' %}" class="list-group-item list-group-item-action">User</a>
+        <a href="{% url 'home' %}" class="list-group-item list-group-item-action text-capitalize">Dashboard</a>
+        <a href="{% url 'list-tiket' %}" class="list-group-item list-group-item-action text-capitalize">Tiket</a>
+        <a href="{% url 'list-tiket' %}" class="list-group-item list-group-item-action text-capitalize">Tiket review</a>
+        <a href="{% url 'list-tiket' %}" class="list-group-item list-group-item-action text-capitalize">Tiket history</a>
+        <a href="{% url 'user-list' %}" class="list-group-item list-group-item-action text-capitalize">User</a>
       </div>
-    </div>
-    <div class="col-11 m-0 p-0 p-2">
-      {% block content %}
+    </aside>
+    <div class="col-10 m-0 p-0 p-2" style="background: var(--c-slate-200);">
+      <div class="p-2 m-2 rounded-3 shadow" style="background: white; height: 100%;">
+        {% block content %}
 
-      {% endblock %}
+        {% endblock %}
+      </div>
     </div>
   </div>
 {% endblock %}
