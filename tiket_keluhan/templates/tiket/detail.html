@@ -5,48 +5,71 @@
 {% endblock %}
 
 {% block content %}
-  <div>
-    <section class="row mb-2 px-2">
-      <div class="col">
-        <p style="font-weight: 600;">Tiket ID: #{{ tiket }}</p>
-      </div>
-      <div class="col-2">
-        <p>
-          Status: <span class="badge bg-secondary">{{ tiket.status }}</span>
-        </p>
-      </div>
-      <div class="col">
-        <p class="text-end">Dibuat pada: {{ tiket.created_at }}</p>
-      </div>
-    </section>
-    <hr />
-    <section class="" style="overflow-y: auto; height: calc(70dvh);">
-      <div class="row mb-2 px-2">
+  <div class="card">
+    <div class="card-header bg-primary d-flex justify-content-between">
+      <a href="{% url 'list-tiket' %}" class="btn btn-light">Back</a>
+      {% if tiket.status == 'sent' or tiket.status == 'riject' %}
+        <div class="d-flex gap-3">
+          <a href="/tiket/{{ tiket.id }}/asign" class="btn btn-secondary">Asign To Executor</a>
+          <form class="d-flex gap-2 border p-1 rounded-2" action="/tiket/{{ tiket.id }}/update" method="post">
+            {% csrf_token %}
+            <select name="status" id="" class="form-select" required>
+              <option value="" selected disabled>Status</option>
+              <option value="done">Done</option>
+              <option value="reject">Reject</option>
+            </select>
+            <button type="submit" class="btn btn-warning">Ubah</button>
+          </form>
+        </div>
+      {% endif %}
+    </div>
+    <div class="card-body">
+      <section class="row m-0 pb-0 px-2">
         <div class="col">
-          <label for="" class="form-label">Judul</label>
-          <input type="text" value="{{ tiket.subject }}" class="form-control form-disabled" disabled>
+          <p style="font-weight: 600;">Tiket No: #{{ tiket }}</p>
+        </div>
+        <div class="col-2">
+          <p>
+            Status: <span class="badge bg-secondary text-capitalize">
+              {% if tiket.status == 'sent' %}
+                open
+              {% else %}
+                {{ tiket.status }}
+              {% endif %}
+            </span>
+          </p>
         </div>
         <div class="col">
-           <label for="" class="form-label">Dibuat oleh</label>
-          <input type="text" value="{{ tiket.login_id }}" class="form-control form-disabled" disabled>
+          <p class="text-end">Dibuat pada: {{ tiket.created_at }}</p>
         </div>
-      </div>
-      <div class="mb-2">
-        <label for="" class="form-label">Keterangan</label>
-        <textarea disabled class="form-control form-disable">{{ tiket.description }}</textarea>
-      </div>
+      </section>
+      <hr class="my-1" />
+      <section class="" style="overflow-x: hidden; overflow-y: auto; height: calc(60dvh);">
+        <div class="row mb-2">
+          <div class="col">
+            <label for="" class="form-label">Judul</label>
+            <input type="text" value="{{ tiket.subject }}" class="form-control form-disabled" disabled />
+          </div>
+          <div class="col">
+            <label for="" class="form-label">Dibuat oleh</label>
+            <input type="text" value="{{ tiket.login_id }}" class="form-control form-disabled" disabled />
+          </div>
+        </div>
+        <div class="mb-2">
+          <label for="" class="form-label">Keterangan</label>
+          <textarea disabled class="form-control form-disable">{{ tiket.description }}</textarea>
+        </div>
         <div>
-            <label for="" class="form-label">Media</label>
-            {% if attachment %}
+          <label for="" class="form-label">Media</label>
+          {% if attachment %}
             <div>
-                <a href="{{ attachment.file.url }}" style="cursor: pointer;" target="_blank">
-                    <img src="{{ attachment.file.url }}" alt="tiket-{{ tiket }}-media" style="width: 50%;">
-                </a>
+              <a href="{{ attachment.file.url }}" style="cursor: pointer;" target="_blank"><img src="{{ attachment.file.url }}" alt="tiket-{{ tiket }}-media" style="width: 50%;" /></a>
             </div>
-            {% else %}
+          {% else %}
             <p>Tidak ada media yg di unggah</p>
-            {% endif %}
+          {% endif %}
         </div>
-    </section>
+      </section>
+    </div>
   </div>
 {% endblock %}

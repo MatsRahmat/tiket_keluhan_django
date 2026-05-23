@@ -36,6 +36,7 @@ from tiket_keluhan.models import (
     TiketModel,
     CustomUserModel,
     TiketAttachmentModel,
+    TiketStatusHistory,
 )
 
 from tiket_keluhan.services import (
@@ -337,54 +338,71 @@ class TiketCreateView(CreateView):
         return context
     
 class TiketUpdateView(LoginRequiredMixin,UpdateView):
-    model       = TiketModel
-    fields      = ['login_id','subject', 'description']
-    template    ="tiket/form_tiket.html"
-    success_url = reverse_lazy("home")
+    # model       = TiketModel
+    # fields      = ['login_id','subject', 'description']
+    # template    ="tiket/form_tiket.html"
+    # success_url = reverse_lazy("tiket-list")
     login_url   = "login" # Fallback url ketika belum login
+    http_method_names = ['post']
     
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        context["action"] = "update"
-        return context
+    # def get_context_data(self, **kwargs) -> dict[str, Any]:
+    #     context = super().get_context_data(**kwargs)
+    #     context["action"] = "update"
+    #     return context
     
-    def form_valid(self, form):
-        response = super().form_valid(form)
-        messages.success(self.request, "Tiket berhasil di ubah")
-        file = self.request.FILES.get("file")
-        attachment = getattr(self.object, "attachment")
-        if file:
-            print("File baru ditemukan")
-            # validasi file size
-            if file.size > MAX_FILE_SIZE:
-                form.add_error('file', 'Maximum file size adalah 5MB')
-                return self.form_invalid(form)
+    def post(self, req, *args, **kwargs):
+        """Method post untuk update tiket langsung menjadi Done atau Riject"""
+        tiket_id = self.kwargs.get("pk")
+        new_status = self.request.POST.get("status")
+        try:
+            tiket = TiketModel.objects.get(id=tiket_id)
+            tiket.status = new_status
+            tiket.save()
+            messages.success(req, "Berhasil ubah status tiket %s menjadi %s" % (tiket, new_status))
+        except TiketModel.DoesNotExist as de:
+            print("data not found %s" % de)
+            messages.error(req, "Tiket tidak ditemukan, gagal update status tiket")
+
+        return redirect("/tiket")
+    
+    
+    # def form_valid(self, form):
+    #     response = super().form_valid(form)
+    #     messages.success(self.request, "Tiket berhasil di ubah")
+    #     file = self.request.FILES.get("file")
+    #     attachment = getattr(self.object, "attachment")
+    #     if file:
+    #         print("File baru ditemukan")
+    #         # validasi file size
+    #         if file.size > MAX_FILE_SIZE:
+    #             form.add_error('file', 'Maximum file size adalah 5MB')
+    #             return self.form_invalid(form)
             
-            ext = os.path.splitext(file.name)[1].lower()
-            allowed_ext = ['.png','.jpg','.jpeg']
-            if ext not in allowed_ext:
-                form.add_error('file', 'Extensi file tidak sesuai, hanya untuk PNG,JPG,JPEG')
-                return self.form_invalid(form)
+    #         ext = os.path.splitext(file.name)[1].lower()
+    #         allowed_ext = ['.png','.jpg','.jpeg']
+    #         if ext not in allowed_ext:
+    #             form.add_error('file', 'Extensi file tidak sesuai, hanya untuk PNG,JPG,JPEG')
+    #             return self.form_invalid(form)
             
-            today = date.today().strftime("%Y%m%d")
-            new_name = f"{today}-{uuid.uuid4().hex}{ext}"
+    #         today = date.today().strftime("%Y%m%d")
+    #         new_name = f"{today}-{uuid.uuid4().hex}{ext}"
             
-            if attachment:
-                attachment.file = file
-                attachment.original_name = file.name
-                attachment.stored_name = new_name
-                attachment.save()
-            else:
-                TiketAttachmentModel.objects.create(
-                    tiket=self.object,
-                    file=file,
-                    sotred_name=new_name, # original name handle by model save method
-                )
-        else:
-            pass
-            print("File tidak berubah")
+    #         if attachment:
+    #             attachment.file = file
+    #             attachment.original_name = file.name
+    #             attachment.stored_name = new_name
+    #             attachment.save()
+    #         else:
+    #             TiketAttachmentModel.objects.create(
+    #                 tiket=self.object,
+    #                 file=file,
+    #                 sotred_name=new_name, # original name handle by model save method
+    #             )
+    #     else:
+    #         pass
+    #         print("File tidak berubah")
             
-        return response
+    #     return response
     
 class TiketDeleteView(LoginRequiredMixin,DeleteView):
     model           = TiketModel
