@@ -1,0 +1,52 @@
+{% extends 'content_layout.html' %}
+
+{% block title %}
+  Detail Tiket #{{ tiket }}
+{% endblock %}
+
+{% block content %}
+  <div>
+    <section class="row mb-2 px-2">
+      <div class="col">
+        <p style="font-weight: 600;">Tiket ID: #{{ tiket }}</p>
+      </div>
+      <div class="col-2">
+        <p>
+          Status: <span class="badge bg-secondary">{{ tiket.status }}</span>
+        </p>
+      </div>
+      <div class="col">
+        <p class="text-end">Dibuat pada: {{ tiket.created_at }}</p>
+      </div>
+    </section>
+    <hr />
+    <section class="" style="overflow-y: auto; height: calc(70dvh);">
+      <div class="row mb-2 px-2">
+        <div class="col">
+          <label for="" class="form-label">Judul</label>
+          <input type="text" value="{{ tiket.subject }}" class="form-control form-disabled" disabled>
+        </div>
+        <div class="col">
+           <label for="" class="form-label">Dibuat oleh</label>
+          <input type="text" value="{{ tiket.login_id }}" class="form-control form-disabled" disabled>
+        </div>
+      </div>
+      <div class="mb-2">
+        <label for="" class="form-label">Keterangan</label>
+        <textarea disabled class="form-control form-disable">{{ tiket.description }}</textarea>
+      </div>
+        <div>
+            <label for="" class="form-label">Media</label>
+            {% if attachment %}
+            <div>
+                <a href="{{ attachment.file.url }}" style="cursor: pointer;" target="_blank">
+                    <img src="{{ attachment.file.url }}" alt="tiket-{{ tiket }}-media" style="width: 50%;">
+                </a>
+            </div>
+            {% else %}
+            <p>Tidak ada media yg di unggah</p>
+            {% endif %}
+        </div>
+    </section>
+  </div>
+{% endblock %}

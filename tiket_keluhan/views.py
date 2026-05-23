@@ -283,15 +283,16 @@ class TiketListView(LoginRequiredMixin,ListView):
 
 class TiketDetailView(LoginRequiredMixin,DetailView):
     model           = TiketModel
-    form_class      = TiketForm
-    template_name   ="tiket/form_tiket.html"
+    # form_class      = TiketForm
+    template_name   = "tiket/detail.html"
     login_url       = "login"  # Fallback url ketika belum login
+    context_object_name = 'tiket'
     
     # Untuk menampilkan form dan mengisinya dengan data yg didapat
     def get_context_data(self, **kwargs) -> dict:
         context = super().get_context_data(**kwargs)
-        context["form"] = self.form_class(instance=self.object) 
-        context["action"] = "update"
+        # context["form"] = self.form_class(instance=self.object) 
+        # context["action"] = "update"
         # print(self.object)
         attachment = getattr(self.object, "attachment", None)
         if attachment:

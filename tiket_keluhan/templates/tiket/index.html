@@ -52,7 +52,7 @@
             {% for tiket in tickets %}
               <tr class="border-dark border-bottom">
                 <td class="p-1">
-                  <a href="tiket/{{ tiket.id }}" class="p-0 m-0" style="cursor: pointer;font-size: medium;">#{{ tiket }}</a>
+                  <a href="tiket/{{ tiket.id }}/detail" class="p-0 m-0" style="cursor: pointer;font-size: medium;">#{{ tiket }}</a>
                   <h5 class="p-0 m-0">{{ tiket.subject }}</h5>
                 </td>
                 <td>
@@ -63,7 +63,6 @@
                 <td>
                   <div class="col d-flex justify-content-center gap-2">
                     <button data-delete="{{ tiket.id }}" data-delete-url="/tiket/{{ tiket.id }}/delete" data-delete-mesg="Apakah anda yakin ingin menghapus tiket {{ tiket.no_tiket }}" class="btn btn-danger">Delete</button>
-                    {% comment %} <a href="/tiket/{{ tiket.id }}/delete" role="button" class="btn btn-danger">Delete</a> {% endcomment %}
                   </div>
                 </td>
               </tr>

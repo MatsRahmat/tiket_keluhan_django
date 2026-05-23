@@ -33,8 +33,9 @@ urlpatterns = [
     # ================================ TIKET ================================
     path('tiket', TiketListView.as_view(), name="list-tiket"),
     path('new-tiket', TiketCreateView.as_view(), name="create-tiket"), # un-auth page
-    path('tiket/<int:pk>/edit', TiketDetailView.as_view(), name="edit-tiket"),
-    path('tiket/<int:pk>/update', TiketUpdateView.as_view(), name="update-tiket"),
+    path('tiket/<int:pk>/detail', TiketDetailView.as_view(), name="detail-tiket"),
+    # path('tiket/<int:pk>/edit', TiketDetailView.as_view(), name="edit-tiket"),
+    # path('tiket/<int:pk>/update', TiketUpdateView.as_view(), name="update-tiket"),
     path('tiket/<int:pk>/delete', TiketDeleteView.as_view(), name="delete-tiket"),
     
     # ================================ TIKET ================================
