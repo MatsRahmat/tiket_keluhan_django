@@ -12,6 +12,7 @@ from tiket_keluhan.views import (
     TiketUpdateView,
     TiketDetailView,    
     TiketDeleteView,
+    TiketAssignView,
     
     # =========== USER ===========
     UserListView,
@@ -37,7 +38,7 @@ urlpatterns = [
     # path('tiket/<int:pk>/edit', TiketDetailView.as_view(), name="edit-tiket"),
     path('tiket/<int:pk>/update', TiketUpdateView.as_view(), name="update-tiket"),
     path('tiket/<int:pk>/delete', TiketDeleteView.as_view(), name="delete-tiket"),
-    
+    path('tiket/<int:pk>/assign', TiketAssignView.as_view(), name="assign-tiket"),  
     # ================================ TIKET ================================
     path('user', UserListView.as_view(), name="user-list"),
     path('user/add', UserCreateView.as_view(), name="user-create"),

@@ -10,7 +10,7 @@
       <a href="{% url 'list-tiket' %}" class="btn btn-light">Back</a>
       {% if tiket.status == 'sent' or tiket.status == 'riject' %}
         <div class="d-flex gap-3">
-          <a href="/tiket/{{ tiket.id }}/asign" class="btn btn-secondary">Asign To Executor</a>
+          <a href="{% url 'assign-tiket' tiket.id %}" class="btn btn-secondary">Asign To Executor</a>
           <form class="d-flex gap-2 border p-1 rounded-2" action="/tiket/{{ tiket.id }}/update" method="post">
             {% csrf_token %}
             <select name="status" id="" class="form-select" required>

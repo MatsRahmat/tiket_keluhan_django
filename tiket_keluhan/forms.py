@@ -1,5 +1,5 @@
 from django import forms
-from tiket_keluhan.models import CustomUserModel, TiketModel
+from tiket_keluhan.models import CustomUserModel, TiketModel, TiketActionModel
 from tiket_keluhan.enums import (
     RoleEnum
 )
@@ -46,3 +46,10 @@ class UserForm(forms.ModelForm):
     #         choices=roles,
     #         attrs={ "class": "form-select" }
     #         )
+
+
+
+class TiketActionForm(forms.ModelForm):
+    class Meta:
+        model = TiketActionModel
+        fields = ['tiket', 'aktor', 'action_type','note']

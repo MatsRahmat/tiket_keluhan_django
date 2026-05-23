@@ -16,7 +16,6 @@ class MesgTitleEnum(Enum):
 
 class TiketStatusEnum(Enum):
     SENT = "sent"
-    APPROVED = "approved"
     ON_PROGRES="on progres"
     DONE    = "done"
     REJECT  = "reject"

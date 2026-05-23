@@ -16,7 +16,8 @@ from django.contrib import messages
 from tiket_keluhan.forms import (
     AuthForm, 
     TiketForm,
-    UserForm
+    UserForm,
+    TiketActionForm
 )
 
 from tiket_keluhan.utils import (
@@ -29,7 +30,8 @@ from tiket_keluhan.utils import (
 
 from tiket_keluhan.enums import (
     MesgTitleEnum,
-    RoleEnum
+    RoleEnum,
+    TiketStatusEnum
 )
 
 from tiket_keluhan.models import (
@@ -37,6 +39,7 @@ from tiket_keluhan.models import (
     CustomUserModel,
     TiketAttachmentModel,
     TiketStatusHistory,
+    TiketActionModel,
 )
 
 from tiket_keluhan.services import (
@@ -352,8 +355,12 @@ class TiketUpdateView(LoginRequiredMixin,UpdateView):
     
     def post(self, req, *args, **kwargs):
         """Method post untuk update tiket langsung menjadi Done atau Riject"""
+        
+        logged_user_id = self.request.session.get("user_id")
         tiket_id = self.kwargs.get("pk")
         new_status = self.request.POST.get("status")
+        logged_user = CustomUserModel.objects.get(id=logged_user_id)
+        
         try:
             tiket = TiketModel.objects.get(id=tiket_id)
             tiket.status = new_status
@@ -363,6 +370,12 @@ class TiketUpdateView(LoginRequiredMixin,UpdateView):
             print("data not found %s" % de)
             messages.error(req, "Tiket tidak ditemukan, gagal update status tiket")
 
+        # Membuat tiket history baru untuk aksi ini
+        TiketStatusHistory.objects.create(
+            tiket=tiket, 
+            note="Tiket langsung dirubah menjadi %s" % tiket.status,
+            changed_by=logged_user)
+        
         return redirect("/tiket")
     
     
@@ -412,10 +425,88 @@ class TiketDeleteView(LoginRequiredMixin,DeleteView):
     http_method_names = ['post']
     
     def delete(self, request, *args, **kwargs):
-        print("Success delete tiket")
+        tiket_obj = self.get_object()
+        logged_user_id = self.request.sessions.get('user_id')
+        logged_user = CustomUserModel.objects.get(id=logged_user_id)
+        # Membuat tiket history baru untuk aksi ini
+        TiketStatusHistory.objects.create(
+            tiket=tiket_obj, 
+            note="Tiket dihapus",
+            changed_by=logged_user)
         messages.success(request, "Berhasil menghapus data")
         return super().delete(request, *args, **kwargs)
 
+
+class TiketAssignView(LoginRequiredMixin, CreateView):
+    model           = TiketActionModel
+    template_name   = 'tiket/assign_form.html'
+    login_url       = '/login'
+    fields          = ['tiket', 'aktor', 'action_type','note']
+    http_method_names = ['post', 'get']
+    
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        
+        tiket_id = self.kwargs.get('pk')
+        try:
+            detail_tiket = TiketModel.objects.get(id=tiket_id)
+            context["tiket"] = detail_tiket
+        except TiketModel.DoesNotExist as de:
+            print("Tiket tidak ditemukan, %s" % de)
+            messages.error(self.request, "Tiket tidak ditemukan: %s" % de)
+            return context
+        
+        all_staff_user = CustomUserModel.objects.filter(role=RoleEnum.staff.value).all()
+        context["staff_users"] = all_staff_user
+        
+        print(context)
+        return context
+    
+    def post(self, req, *args, **kwargs):
+        logged_user_id = self.request.session.get('user_id')
+        tiket_id = self.kwargs.get("pk")
+        post_payload = self.request.POST
+        
+        copy_post_payload = post_payload.copy()
+        copy_post_payload["tiket"] = tiket_id
+        
+        form = TiketActionForm(copy_post_payload)
+        
+        if not form.is_valid():
+            messages.error(req,"Data tidak sesuai, coba ulangi lagi")
+            return redirect('list-tiket')
+        
+        # Save Tiket action
+        tiket_action = form.save(commit=False)
+        tiket_action.save()
+        messages.success(req, "Tiket Berhasil di Assign")
+
+        # Update status pada tiket
+        cur_tiket = TiketModel.objects.get(id=tiket_id)
+        if not cur_tiket:
+            message.error(req, "Gagal update status tiket")
+            return redirect('list-tiket')
+        
+        cur_tiket.status = TiketStatusEnum.ON_PROGRES.value
+        cur_tiket.save()
+
+        logged_user = CustomUserModel.objects.get(id=logged_user_id)
+        # Membuat tiket history baru untuk aksi ini
+        TiketStatusHistory.objects.create(
+            tiket=cur_tiket, 
+            note="Tiket Telah berhasil di update menjadi %s" % cur_tiket.status,
+            changed_by=logged_user)
+        
+        
+        return redirect('list-tiket')
+    
+    # def form_valid(self, form):
+    #     response = super().form_valid(form)
+        
+    #     print('apakah valid??')
+        
+    #     return response
+    
     
 ###################################################
 #                   USER CLASS VIEW

@@ -1,0 +1,42 @@
+{% extends 'form_layout.html' %}
+
+{% block title %}
+  Assign Tiket
+{% endblock %}
+
+{% block form %}
+  <form action="" method="post" class="form">
+    {% csrf_token %}
+    <div class="mb-2">
+      <label for="" class="form-label">Tiket</label>
+      <input type="text" name="tiket" disabled value="#{{ tiket }}" class="form-control form-disabled" />
+    </div>
+    <div class="row mb-2">
+      <div class="col">
+        <label for="" class="form-label">Eksekutor <span class="text-danger">*</span></label>
+        <select name="aktor" id="aktor" class="form-select" required>
+          <option value="" disabled selected>-- Eksekutor --</option>
+          {% for user in staff_users %}
+            <option value="{{ user.id }}">{{ user.username }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col">
+        <label for="" class="form-label">Type Aksi <span class="text-danger">*</span></label>
+        <input type="text" name="action_type" id="action_type" class="form-control" required />
+      </div>
+    </div>
+    <div>
+      <label for="note" class="form-label">Note</label>
+      <textarea name="note" id="note" rows="7" class="form-control"></textarea>
+    </div>
+    <div class="row mt-2">
+      <div class="col">
+        <button class="btn btn-light border-dark" style="width: 100%;" type="reset">Reset</button>
+      </div>
+      <div class="col">
+        <button class="btn btn-primary" style="width: 100%;" type="submit">Submit</button>
+      </div>
+    </div>
+  </form>
+{% endblock %}
