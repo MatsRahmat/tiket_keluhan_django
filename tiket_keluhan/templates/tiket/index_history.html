@@ -6,7 +6,7 @@
 
 {% block content %}
   <div>
-    <h2>Tiket</h2>
+    <h2>Tiket History</h2>
     <hr />
     <div class="card">
       <form class="card-body row" method="get" action="" >
@@ -42,20 +42,15 @@
     <hr>
     <div class="mt-4" style="">
       <table style="overflow-y:auto;" class="table table-striped table-hover border border-dark">
-        {% if tickets %}
-          {% for tiket in tickets %}
+        {% if tikets %}
+          {% for tiket in tikets %}
             <tr class="border-dark border-bottom">
               <td class="">
                 <div class="row">
                   <div class="col-10">
                     <h6 class="">#{{ tiket }}</h6>
-                    <h5 class="p-0 m-0">{{ tiket.subject }}</h5>
-                    <p class="m-0">{{ tiket.description }}</p>
-                  </div>
-                  <div class="col d-flex justify-content-center gap-2 py-3">
-                    <a href="/tiket/{{ tiket.id }}/edit" role="button" class="btn btn-primary">Edit</a>
-                    <a href="/tiket/{{ tiket.id }}/delete" role="button" class="btn btn-danger">Delete</a>
-                    {% comment %} <button class="btn btn-danger">Delete</button> {% endcomment %}
+                    <h5 class="p-0 m-0"><span>{{ tiket.tiket.status }}</span> - <span>{{ tiket.changed_by.username }}</span></h5>
+                    <p class="m-0">{{ tiket.note }}</p>
                   </div>
                 </div>
               </td>

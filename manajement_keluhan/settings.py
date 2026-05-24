@@ -112,7 +112,6 @@ AUTH_PASSWORD_VALIDATORS = [
 
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
-    'tiket_keluhan.auth_backend.DualLogin',
 ]
 
 # Auth

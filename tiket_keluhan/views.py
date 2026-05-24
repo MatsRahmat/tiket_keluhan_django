@@ -12,6 +12,7 @@ from django.http import HttpResponse, request, response
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.hashers import make_password
 from django.contrib import messages
 from tiket_keluhan.forms import (
     AuthForm, 
@@ -110,12 +111,14 @@ class AuthView(View):
         # form = AuthForm(req.POST)
         login_id = req.POST.get("login_id", None)
         password = req.POST.get("password", None)
-        
         if login_id and password:
             context = {}
+            print("logi_id", login_id, "password", password, sep="|")
+            auth_user = CustomUserModel.objects.get(login_id=login_id)
+            print("user nya ada?", auth_user, sep="|" )
             user = authenticate(req,login_id=login_id, password=password)
+            print("usr nya", user, sep="|")
             if user:
-                print("Auth user")
                 print(user)
                 login(req, user)
                 req.session['username'] = user.username
@@ -197,12 +200,7 @@ class TiketListView(LoginRequiredMixin,ListView):
         # print(f"Start date {start_date} end date {end_date}")
         # print(f"Raw start_date {self.request.GET.get("start_date", None)} raw end_date {self.request.GET.get("end_date", None)}")
         tikets = []        
-        if role == RoleEnum.nasabah.value:
-            # Ketika user = nasabah
-            print("Masuk nasabah")
-            tikets = getTiketAsNasabah(login_id)
-            pass
-        elif role in (RoleEnum.operator.value, RoleEnum.diretur.value) :
+        if role in (RoleEnum.operator.value, RoleEnum.diretur.value) :
             # ketika operation user login
             tikets = getTiketAsOperator(status=status, tiket_no=tiket_no, start_date=start_date, end_date=end_date)
             # print(tikets)
@@ -283,6 +281,18 @@ class TiketListView(LoginRequiredMixin,ListView):
         
         # print(context)
         return context
+    
+
+class TiketHistoryListView(LoginRequiredMixin, ListView):
+    model = TiketStatusHistory
+    login_url = "login"
+    template_name = "tiket/index_history.html"
+    context_object_name = "tikets"
+    
+    def get_queryset(self):
+        pass
+        return super().get_queryset()
+    
     
 
 class TiketDetailView(LoginRequiredMixin,DetailView):
@@ -436,7 +446,6 @@ class TiketDeleteView(LoginRequiredMixin,DeleteView):
         messages.success(request, "Berhasil menghapus data")
         return super().delete(request, *args, **kwargs)
 
-
 class TiketAssignView(LoginRequiredMixin, CreateView):
     model           = TiketActionModel
     template_name   = 'tiket/assign_form.html'
@@ -560,6 +569,15 @@ class UserUpdateView(LoginRequiredMixin,UpdateView):
         context["form"] = self.form_class(instance=self.object)
         context["action"] = "update" 
         return context
+    
+    def form_valid(self, form):
+        user = form.save(commit=False)
+        password = self.request.POST.get("password")
+        if not password:
+            form.add_error("Password required")
+        # clean_form = form.clea
+        return super().form_valid(form)
+    
 
 class UserDeleteView(LoginRequiredMixin,DeleteView):
     model         = CustomUserModel

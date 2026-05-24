@@ -13,6 +13,7 @@ from tiket_keluhan.views import (
     TiketDetailView,    
     TiketDeleteView,
     TiketAssignView,
+    TiketHistoryListView,
     
     # =========== USER ===========
     UserListView,
@@ -33,6 +34,7 @@ urlpatterns = [
     
     # ================================ TIKET ================================
     path('tiket', TiketListView.as_view(), name="list-tiket"),
+    path('tiket-history', TiketHistoryListView.as_view(), name="list-tiket-history"),
     path('new-tiket', TiketCreateView.as_view(), name="create-tiket"), # un-auth page
     path('tiket/<int:pk>/detail', TiketDetailView.as_view(), name="detail-tiket"),
     # path('tiket/<int:pk>/edit', TiketDetailView.as_view(), name="edit-tiket"),

@@ -2,6 +2,7 @@ import os
 from datetime import date
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.hashers import make_password
 from tiket_keluhan.enums import RoleEnum, TiketStatusEnum
 
 from tiket_keluhan.utils import (
@@ -23,6 +24,10 @@ class CustomUserModel(AbstractUser):
     def save(self, *args, **kwargs):
         # Membuat agar login id tetap lower case
         self.login_id = self.login_id.lower()
+        print("Password", self.password, sep="|")
+        if self.password and not self.password.startswith("pbkdf2_"):
+            self.password = make_password(self.password)
+            
         super().save(*args, **kwargs)
     
     def __str__(self):
@@ -108,7 +113,7 @@ class TiketActionModel(models.Model):
 class ReviewerModel(models.Model):
     tiket = models.ForeignKey(TiketModel, on_delete=models.CASCADE, related_name='reviews')
     reviewer = models.ForeignKey(CustomUserModel, on_delete=models.SET_NULL, null=True, related_name="given_reviews")
-    evaluation = models.TextField()
+    evaluation = models.TextField('evaluation',null=True, blank=True)
     rating = models.PositiveSmallIntegerField()
     created_at = models.DateTimeField(auto_now_add=True)
      
