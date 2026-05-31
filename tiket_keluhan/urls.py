@@ -20,6 +20,7 @@ from tiket_keluhan.views import (
     # =========== TIKET Review ===========
     TiketReviewList,
     TiketReviewForm,
+    TiketReviewDetail,
     
     # =========== TIKET Action/Assignment ===========
     TiketAssignView,
@@ -46,6 +47,7 @@ urlpatterns = [
     # ================================ TIKET REVIEW ================================
     path('tiket-review', TiketReviewList.as_view(), name="list-tiket-review"),
     path('tiket-review/<int:pk>/add', TiketReviewForm.as_view(), name='add-tiket-review'),
+    path('tiket-review/<int:pk>/detail', TiketReviewDetail.as_view(), name='detail-tiket-review'),
     
     # ================================ TIKET ================================
     path('tiket', TiketListView.as_view(), name="list-tiket"),

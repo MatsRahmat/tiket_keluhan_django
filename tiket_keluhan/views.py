@@ -552,6 +552,37 @@ class TiketReviewList(LoginRequiredMixin,ListView):
         # print(context)
         return context
     
+    
+class TiketReviewDetail(LoginRequiredMixin,DetailView):
+    model = TiketModel
+    template_name = "tiket/detail_review.html"
+    login_url = "login"
+    context_object_name = "tiket"
+    
+    # def get_queryset(self):
+    #     # qr = super().get_queryset()
+    #     # qr = qr.prefetch_related('reviews')
+    #     # print("get query", qr, sep="/\/")
+    #     tiket_detail = self.kwargs.get("pk")
+    #     qr = TiketModel.objects.prefetch_related('reviews')
+    #     return qr
+    
+    
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        tiket = context["tiket"]
+        
+        tiket_review = None
+        try:
+            tiket_review = TiketReviewerModel.objects.select_related('tiket').filter(tiket=tiket).get()
+        except TiketReviewerModel.DoesNotExist:
+            pass
+        
+        context["tiket_reviewed"] = tiket_review
+        return context
+    
+    
+    
 class TiketReviewForm(LoginRequiredMixin,CreateView):
     models = TiketReviewerModel
     form_class = TiketReviewForm

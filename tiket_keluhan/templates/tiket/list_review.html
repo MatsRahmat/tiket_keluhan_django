@@ -40,7 +40,7 @@
             {% for tiket in tickets %}
               <tr class="border-dark border-bottom">
                 <td class="p-1">
-                  <a href="tiket/{{ tiket.id }}/detail" class="p-0 m-0" style="cursor: pointer;font-size: medium;">#{{ tiket }}</a>
+                  <a href="{% url 'detail-tiket-review' tiket.id %}" class="p-0 m-0" style="cursor: pointer;font-size: medium;">#{{ tiket }}</a>
                   <h5 class="p-0 m-0">{{ tiket.subject }}</h5>
                 </td>
                 <td>
