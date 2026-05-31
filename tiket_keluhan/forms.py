@@ -1,5 +1,7 @@
 from django import forms
-from tiket_keluhan.models import CustomUserModel, TiketModel, TiketActionModel
+from tiket_keluhan.models import (
+     CustomUserModel, TiketModel, TiketActionModel, ReviewerModel
+)
 from tiket_keluhan.enums import (
     RoleEnum
 )
@@ -53,3 +55,13 @@ class TiketActionForm(forms.ModelForm):
     class Meta:
         model = TiketActionModel
         fields = ['tiket', 'aktor', 'action_type','note']
+        
+        
+        
+class TiketReviewForm(forms.ModelForm):
+    class Meta:
+        model = ReviewerModel
+        fields = ['evaluation']
+        widgets = {
+            'evaluation': forms.Textarea(attrs={"class": "form-control", "rows": 5}),
+        }

@@ -4,6 +4,12 @@
   Assign Tiket
 {% endblock %}
 
+{% block card_header %}
+<div>
+  <a href="{% url 'list-tiket' %}" role="button" class="btn btn-danger">Cancel</a>
+</div>
+{% endblock card_header %}
+
 {% block form %}
   <form action="" method="post" class="form">
     {% csrf_token %}

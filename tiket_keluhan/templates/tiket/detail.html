@@ -7,19 +7,12 @@
 {% block content %}
   <div class="card">
     <div class="card-header bg-primary d-flex justify-content-between">
-      <a href="{% url 'list-tiket' %}" class="btn btn-light">Back</a>
+      {% comment %} <a href="{% url 'list-tiket' %}" class="btn btn-light">Back</a> {% endcomment %}
+      <a href="{{ request.META.HTTP_REFERER }}" class="btn btn-light">Back</a>
+
       {% if tiket.status == 'sent' or tiket.status == 'riject' %}
         <div class="d-flex gap-3">
           <a href="{% url 'assign-tiket' tiket.id %}" class="btn btn-secondary">Asign To Executor</a>
-          <form class="d-flex gap-2 border p-1 rounded-2" action="/tiket/{{ tiket.id }}/update" method="post">
-            {% csrf_token %}
-            <select name="status" id="" class="form-select" required>
-              <option value="" selected disabled>Status</option>
-              <option value="done">Done</option>
-              <option value="reject">Reject</option>
-            </select>
-            <button type="submit" class="btn btn-warning">Ubah</button>
-          </form>
         </div>
       {% endif %}
     </div>

@@ -9,7 +9,7 @@
       </div>
       <div class="list-group">
         <a href="{% url 'home' %}" class="list-group-item list-group-item-action text-capitalize">Dashboard</a>
-        <details class="list-group-item list-group-item-action text-capitalize" style="padding-inline: 2px; margin-inline: 2px;">
+        <details class="list-group-item list-group-item-action text-capitalize" >
           <summary class="">Tiket</summary>
           <div class="list-group mt-2 pl-2">
             {% if request.session.role == 1 or request.session.role == 2 %}
@@ -17,7 +17,7 @@
               <a href="{% url 'list-tiket-history' %}" class="list-group-item list-group-item-action text-capitalize">Tiket history</a>
             {% endif %}
             {% if request.session.role == 1 %}
-              <a href="{% url 'list-tiket' %}" class="list-group-item list-group-item-action text-capitalize">Tiket review</a>
+              <a href="{% url 'list-tiket-review' %}" class="list-group-item list-group-item-action text-capitalize">Tiket review</a>
             {% endif %}
             {% if request.session.role == 3 or request.session.role == 1 %}
               <a href="{% url 'list-tiket' %}" class="list-group-item list-group-item-action text-capitalize">Tiket assignment</a>

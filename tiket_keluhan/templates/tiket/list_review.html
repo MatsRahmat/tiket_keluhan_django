@@ -1,0 +1,70 @@
+{% extends 'content_layout.html' %}
+
+{% block title %}
+    List Tiket Review
+{% endblock title %}
+
+{% block content %}
+  <div>
+    <h2>Tiket Review</h2>
+    <hr />
+    <div class="card" id="filter-section">
+      <form class="card-body row" method="get" action="">
+        <div class="col">
+          <span style="font-size: smaller;">No Tiket</span>
+          <input type="text" id="tiket_no" name="tiket_no" value="{{ filter.tiket_no }}" class="form-control" placeholder="No Tiket" />
+        </div>
+        <div class="col">
+          <span style="font-size: smaller;">Status</span>
+          <select name="status" id="status" class="form-select">
+            <option value="not-reviewed" class="text-capitalize" {% if filter.status == 'not-reviewed' %} selected="selected" {% endif %} >not yet reviewed</option>
+            <option value="reviewed" class="text-capitalize" {% if filter.status == 'reviewed' %} selected="selected" {% endif %} >reviewed</option>
+
+          </select>
+        </div>
+        <div class="col-2 d-flex justify-content-center align-items-end">
+          <button role="button" type="submit" class="btn btn-primary" style="width: 100%;">Cari</button>
+        </div>
+      </form>
+    </div>
+    <hr />
+    <div class="" id="body-section" style="height: calc(50dvh); overflow-y: auto;">
+      <table style="" class="table table-striped table-hover">
+        <colgroup>
+        <col style="width: 80%;">
+        <col style="width: 10%;">
+        <col style="width: 10%;">
+        </colgroup>
+        <tbody>
+          {% if tickets %}
+            {% for tiket in tickets %}
+              <tr class="border-dark border-bottom">
+                <td class="p-1">
+                  <a href="tiket/{{ tiket.id }}/detail" class="p-0 m-0" style="cursor: pointer;font-size: medium;">#{{ tiket }}</a>
+                  <h5 class="p-0 m-0">{{ tiket.subject }}</h5>
+                </td>
+                <td>
+                  <div>
+                    ratting: {{ tiket.reviews.rating }}
+                  </div>
+                </td>
+                <td>
+                  <div class="col d-flex justify-content-center gap-2">
+                    <a href="{% url 'add-tiket-review' tiket.id %}" role="button" class="btn btn-primary">
+                        Review
+                    </a>
+                    {% comment %} <button data-delete="{{ tiket.id }}" data-delete-url="/tiket/{{ tiket.id }}/delete" data-delete-mesg="Apakah anda yakin ingin menghapus tiket {{ tiket.no_tiket }}" class="btn btn-danger">Delete</button> {% endcomment %}
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          {% else %}
+            <h4 class="text-center">Tidak data tiket</h4>
+          {% endif %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% endblock content %}
+
+

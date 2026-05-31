@@ -18,7 +18,8 @@ from tiket_keluhan.forms import (
     AuthForm, 
     TiketForm,
     UserForm,
-    TiketActionForm
+    TiketActionForm,
+    TiketReviewForm
 )
 
 from tiket_keluhan.utils import (
@@ -41,6 +42,7 @@ from tiket_keluhan.models import (
     TiketAttachmentModel,
     TiketStatusHistory,
     TiketActionModel,
+    ReviewerModel as TiketReviewerModel,
 )
 
 from tiket_keluhan.services import (
@@ -114,7 +116,12 @@ class AuthView(View):
         if login_id and password:
             context = {}
             print("logi_id", login_id, "password", password, sep="|")
-            auth_user = CustomUserModel.objects.get(login_id=login_id)
+            try:
+                auth_user = CustomUserModel.objects.get(login_id=login_id)
+            except CustomUserModel.DoesNotExist as e:
+                messages.error(req,"Password atau login id salah")
+                return redirect("/login", context)
+            
             print("user nya ada?", auth_user, sep="|" )
             user = authenticate(req,login_id=login_id, password=password)
             print("usr nya", user, sep="|")
@@ -468,7 +475,7 @@ class TiketAssignView(LoginRequiredMixin, CreateView):
         all_staff_user = CustomUserModel.objects.filter(role=RoleEnum.staff.value).all()
         context["staff_users"] = all_staff_user
         
-        print(context)
+        # print(context)
         return context
     
     def post(self, req, *args, **kwargs):
@@ -506,15 +513,68 @@ class TiketAssignView(LoginRequiredMixin, CreateView):
             note="Tiket Telah berhasil di update menjadi %s" % cur_tiket.status,
             changed_by=logged_user)
         
-        
         return redirect('list-tiket')
     
-    # def form_valid(self, form):
-    #     response = super().form_valid(form)
+class TiketReviewList(LoginRequiredMixin,ListView):
+    model = TiketModel
+    template_name = "tiket/list_review.html"
+    login_url = "login"
+    
+    
+    def get_queryset(self):
+        # qr = TiketModel.objects.filter(status=TiketStatusEnum.DONE.value,reviews__isnull=True)
+        # print(qr)
+        return [] # Return Empty array/list
+    
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        # =========== FILTER ===========
+        filter_status = self.request.GET.get("status", "")
+        filter_no_tiket = self.request.GET.get("tiket_no", "")
         
-    #     print('apakah valid??')
+        # =========== BASE CONTEXT ===========
+        context = super().get_context_data(**kwargs)
         
-    #     return response
+        filter_not_reviewed = True
+        if filter_status == 'reviewed':
+            filter_not_reviewed = False
+        
+        qr = TiketModel.objects.filter(status=TiketStatusEnum.DONE.value,reviews__isnull=filter_not_reviewed)
+        
+        if filter_no_tiket:
+            qr = qr.filter(no_tiket__icontains=filter_no_tiket)
+        
+        context["tickets"] = qr.all()
+        
+        context["filter"] = {
+            "status": filter_status,
+            "tiket_no": filter_no_tiket,
+        }
+        # print(context)
+        return context
+    
+class TiketReviewForm(LoginRequiredMixin,CreateView):
+    models = TiketReviewerModel
+    form_class = TiketReviewForm
+    template_name = "tiket/form_review.html"
+    login_url = "login"
+    success_url = "/tiket-review"
+    
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs);
+                
+        context["tiket"] = TiketModel.objects.get(id=self.kwargs.get("pk"))
+        return context
+    
+    def form_valid(self, form):
+        review_tiket = TiketModel.objects.get(id=self.kwargs.get("pk",""))
+        reviewer = form.save(commit=False)
+        reviewer.rating = self.request.POST.get('rating','')
+        reviewer.reviewer = self.request.user
+        reviewer.tiket = review_tiket
+        reviewer.save()
+        messages.success(self.request, f"Berhasil menambahkan review untuk tiket {review_tiket}")
+        return super().form_valid(form)
+    
     
     
 ###################################################
