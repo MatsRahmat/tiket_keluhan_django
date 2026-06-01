@@ -28,7 +28,7 @@
           <label for="tiket_sub" class="form-label">Tiket Subject</label>
           <input type="text" id="tiket_sub" name="tiket_sub" value="{{ tiket.subject }}" class="form-control" disabled />
         </div>
-        <div class="mb-2">
+        <div class="mb-2 col-6">
           <label class="form-label">Rating</label>
           <div class="d-flex justify-content-start">
             <div class="form-check form-check-inline">
@@ -67,6 +67,13 @@
               </label>
             </div>
           </div>
+        </div>
+        <div class="col-6">
+          <label for="">Status</label>
+          <select name="action_status" id="" class="form-select">
+            <option value="">Approve</option>
+            <option value="reject">Reject</option>
+          </select>
         </div>
         {{ form.as_p }}
       </div>

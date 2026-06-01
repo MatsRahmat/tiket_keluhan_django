@@ -13,6 +13,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.hashers import make_password
+from django.db.models import Q
 from django.contrib import messages
 from tiket_keluhan.forms import (
     AuthForm, 
@@ -113,8 +114,8 @@ class AuthView(View):
         # form = AuthForm(req.POST)
         login_id = req.POST.get("login_id", None)
         password = req.POST.get("password", None)
+        context = {}
         if login_id and password:
-            context = {}
             print("logi_id", login_id, "password", password, sep="|")
             try:
                 auth_user = CustomUserModel.objects.get(login_id=login_id)
@@ -329,7 +330,6 @@ class TiketCreateView(CreateView):
     success_url     = reverse_lazy("message")
     
     def form_valid(self, form):
-        response = super().form_valid(form)
         file = self.request.FILES.get('file')
         if file:
             # validasi file size
@@ -343,6 +343,9 @@ class TiketCreateView(CreateView):
                 form.add_error('file', 'Extensi file tidak sesuai, hanya untuk PNG,JPG,JPEG')
                 return self.form_invalid(form)
             
+            # Save data tiket ketika semua validasi file success
+            response = super().form_valid(form)
+            
             today = date.today().strftime("%Y%m%d")
             new_name = f"{today}-{uuid.uuid4().hex}{ext}"
             
@@ -352,6 +355,10 @@ class TiketCreateView(CreateView):
                 # original_name=file.name,
                 sotred_name=new_name
                 )
+        else:
+            # Save data tiket ketika tidak ada file
+            response = super().form_valid(form)
+        
         messages.success(self.request, "Tiket Berhasil dibuat")
         return response
     
@@ -462,7 +469,7 @@ class TiketDeleteView(LoginRequiredMixin,DeleteView):
 
 class TiketAssignView(LoginRequiredMixin, CreateView):
     model           = TiketActionModel
-    template_name   = 'tiket/assign_form.html'
+    template_name   = 'tiket-actions/assign_form.html'
     login_url       = 'login'
     fields          = ['tiket', 'aktor', 'action_type']
     http_method_names = ['post', 'get']
@@ -589,14 +596,13 @@ class TiketActionView(LoginRequiredMixin, UpdateView):
 
 class TiketReviewList(LoginRequiredMixin,ListView):
     model = TiketModel
-    template_name = "tiket/list_review.html"
+    template_name = "tiket-review/index.html"
     login_url = "login"
     
-    
-    def get_queryset(self):
-        # qr = TiketModel.objects.filter(status=TiketStatusEnum.DONE.value,reviews__isnull=True)
-        # print(qr)
-        return [] # Return Empty array/list
+    # def get_queryset(self):
+    #     # qr = TiketModel.objects.filter(status=TiketStatusEnum.DONE.value,reviews__isnull=True)
+    #     # print(qr)
+    #     return [] # Return Empty array/list
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         # =========== FILTER ===========
@@ -610,7 +616,9 @@ class TiketReviewList(LoginRequiredMixin,ListView):
         if filter_status == 'reviewed':
             filter_not_reviewed = False
         
-        qr = TiketModel.objects.filter(status=TiketStatusEnum.DONE.value,review__isnull=filter_not_reviewed)
+        # Mencari yg sudah done atau reject
+        status_filter = [TiketStatusEnum.DONE.value, TiketStatusEnum.REJECT.value]
+        qr = TiketModel.objects.filter(status__in=status_filter, review__isnull=filter_not_reviewed)
         
         if filter_no_tiket:
             qr = qr.filter(no_tiket__icontains=filter_no_tiket)
@@ -621,12 +629,11 @@ class TiketReviewList(LoginRequiredMixin,ListView):
             "status": filter_status,
             "tiket_no": filter_no_tiket,
         }
-        # print(context)
         return context
     
 class TiketReviewDetail(LoginRequiredMixin,DetailView):
     model = TiketModel
-    template_name = "tiket/detail_review.html"
+    template_name = "tiket-review/detail.html"
     login_url = "login"
     context_object_name = "tiket"
     
@@ -643,19 +650,25 @@ class TiketReviewDetail(LoginRequiredMixin,DetailView):
         context = super().get_context_data(**kwargs)
         tiket = context["tiket"]
         
-        tiket_review = None
-        try:
-            tiket_review = TiketReviewerModel.objects.select_related('tiket').filter(tiket=tiket).get()
-        except TiketReviewerModel.DoesNotExist:
-            pass
+        if hasattr(tiket,"action"):
+            # print(tiket.action)
+            context["tiket_action"] = tiket.action
+        else:
+            print("Tidak punya action")
+            
+        if hasattr(tiket,"review"):
+            # print(tiket.review)
+            context["tiket_reviewed"] = tiket.review
+        else:
+            print("tidak punya review")
         
-        context["tiket_reviewed"] = tiket_review
+        print(tiket.action)
         return context
     
 class TiketReviewForm(LoginRequiredMixin,CreateView):
     models = TiketReviewerModel
     form_class = TiketReviewForm
-    template_name = "tiket/form_review.html"
+    template_name = "tiket-review/form.html"
     login_url = "login"
     success_url = "/tiket-review"
     
@@ -666,16 +679,56 @@ class TiketReviewForm(LoginRequiredMixin,CreateView):
         return context
     
     def form_valid(self, form):
+        review_action = self.request.POST.get("action_status", "")
         review_tiket = TiketModel.objects.get(id=self.kwargs.get("pk",""))
+        logged_user = self.request.user
+        
         reviewer = form.save(commit=False)
         reviewer.rating = self.request.POST.get('rating','')
         reviewer.reviewer = self.request.user
         reviewer.tiket = review_tiket
         reviewer.save()
-        messages.success(self.request, f"Berhasil menambahkan review untuk tiket {review_tiket}")
+        
+        success_mesg = f"Berhasil menambahkan review untuk tiket {review_tiket}"
+        if review_action and review_action == 'reject':
+            review_tiket.status = TiketStatusEnum.REJECT.value
+            review_tiket.save()
+            success_mesg = f"Berhasil review Reject untuk tiket {review_tiket}"
+            
+        messages.success(self.request, success_mesg)
+        
+        success_mesg += f" oleh {logged_user}"
+        TiketStatusHistory.objects.create(
+            tiket=review_tiket,
+            aktor=logged_user,
+            note=success_mesg
+        )
         return super().form_valid(form)
     
+class TiketReviewActionView(LoginRequiredMixin, UpdateView):
+    model = TiketModel
+    fields = ['status']
+    login_url = "login"
+    http_method_names = ['post']
     
+    def post(self, req, *args, **kwargs):
+        action_status = self.request.POST.get("action","")
+        
+        if not action_status:
+            pass
+        
+        obj = self.get_object()
+        obj.status = TiketStatusEnum.REJECT.value
+        obj.save()
+        
+        messages.success(req, "Success Reject Tiket")
+        TiketStatusHistory.objects.create(
+            tiket=obj,
+            aktor=self.request.user,
+            note=f"Berhasil Reject tiket {obj} oleh {self.request.user}"
+        )
+        return redirect("/tiket-review")
+        
     
 ###################################################
 #                   USER CLASS VIEW

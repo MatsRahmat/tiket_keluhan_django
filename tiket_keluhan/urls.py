@@ -8,8 +8,8 @@ from tiket_keluhan.views import (
     TiketSubmitStatus,
     
     # =========== TIKET ===========
-    TiketListView,
     TiketCreateView,
+    TiketListView,
     TiketUpdateView,
     TiketDetailView,    
     TiketDeleteView,
@@ -21,6 +21,7 @@ from tiket_keluhan.views import (
     TiketReviewList,
     TiketReviewForm,
     TiketReviewDetail,
+    TiketReviewActionView,
     
     # =========== TIKET Action/Assignment ===========
     TiketAssignView,
@@ -50,6 +51,7 @@ urlpatterns = [
     path('tiket-review', TiketReviewList.as_view(), name="list-tiket-review"),
     path('tiket-review/<int:pk>/add', TiketReviewForm.as_view(), name='add-tiket-review'),
     path('tiket-review/<int:pk>/detail', TiketReviewDetail.as_view(), name='detail-tiket-review'),
+    path('tiket-review/<int:pk>/action', TiketReviewActionView.as_view(), name="action-review-tiket"),
     
     # ================================ TIKET ACTION ================================
     path('tiket/actions', TiketActionList.as_view(), name="list-action-tiket"),  

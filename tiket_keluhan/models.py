@@ -101,6 +101,7 @@ class TiketActionModel(models.Model):
     action_type = models.CharField('action type',max_length=50)
     note = models.TextField('note',blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return f"{self.tiket.no_tiket} - {self.action_type}"
