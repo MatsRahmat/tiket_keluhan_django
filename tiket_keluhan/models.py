@@ -24,7 +24,6 @@ class CustomUserModel(AbstractUser):
     def save(self, *args, **kwargs):
         # Membuat agar login id tetap lower case
         self.login_id = self.login_id.lower()
-        print("Password", self.password, sep="|")
         if self.password and not self.password.startswith("pbkdf2_"):
             self.password = make_password(self.password)
             
@@ -97,7 +96,7 @@ class TiketAttachmentModel(models.Model):
 #            TIKET ACTION
 # ==================================  
 class TiketActionModel(models.Model):
-    tiket = models.ForeignKey(TiketModel, on_delete=models.CASCADE, related_name="actions")
+    tiket = models.OneToOneField(TiketModel, on_delete=models.CASCADE, related_name="action")
     aktor = models.ForeignKey(CustomUserModel, on_delete=models.SET_NULL, null=True, related_name='actions_actor')
     action_type = models.CharField('action type',max_length=50)
     note = models.TextField('note',blank=True)
@@ -111,7 +110,7 @@ class TiketActionModel(models.Model):
 #         TIKET REVIEWER
 # ==================================      
 class ReviewerModel(models.Model):
-    tiket = models.ForeignKey(TiketModel, on_delete=models.CASCADE, related_name='reviews')
+    tiket = models.OneToOneField(TiketModel, on_delete=models.CASCADE, related_name='review')
     reviewer = models.ForeignKey(CustomUserModel, on_delete=models.SET_NULL, null=True, related_name="given_reviews")
     evaluation = models.TextField('evaluation',null=True, blank=True)
     rating = models.PositiveSmallIntegerField()

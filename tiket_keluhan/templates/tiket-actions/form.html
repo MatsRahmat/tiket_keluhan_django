@@ -1,0 +1,63 @@
+{% extends 'form_layout.html' %}
+{% load static %}
+
+{% block card_header %}
+  <div>
+    <a href="{{ request.META.HTTP_REFERER }}" role="button" class="btn btn-light">Back</a>
+  </div>
+{% endblock %}
+
+{% block form %}
+  <style>
+    .ratting:hover {
+      transform: scale(1.2);
+      transition: all;
+      cursor: pointer;
+    }
+  </style>
+  <div class="" style="height: calc(70dvh); overflow-y: auto; overflow-x: hidden;">
+    <section id="detail">
+      <h5 class="text-center">Detail Tiket</h5>
+      <div class="row">
+        <div class="mb-2 col-6">
+          <label for="tiket_no" class="form-label">No Tiket</label>
+          <input type="text" id="tiket_no" name="tiket" value="#{{ action_tiket.tiket }}" class="form-control" disabled />
+        </div>
+        <div class="mb-2 col-6">
+          <label for="tiket_sub" class="form-label">Action Type</label>
+          <input type="text" id="tiket_sub" name="tiket_sub" value="{{ action_tiket.action_type }}" class="form-control" disabled />
+        </div>
+        <div class="mb-2 col-12">
+          <label for="tiket_sub" class="form-label">Tiket Subject</label>
+          <input type="text" id="tiket_sub" name="tiket_sub" value="{{ action_tiket.tiket.subject }}" class="form-control" disabled />
+        </div>
+        <div class="col-12">
+          <label for="" class="form-label">Description</label>
+          <textarea rows="5" name="note" id="note" class="form-control" disabled>{{ action_tiket.tiket.description }}</textarea>
+        </div>
+        <hr class="my-2" />
+        <div class="col-12">
+          {% if attachment %}
+            <a href="{{ attachment.file.url }}" target="_blank" class="d-block" title="Klik untuk detail"><img src="{{ attachment.file.url }}" alt="{{ attachment }}" style="object-contain: contain; width: 100%; height: 100%;" /></a>
+          {% else %}
+            <h5 class="tect-capitalize text-center">tidak ada media di unggah</h5>
+          {% endif %}
+        </div>
+      </div>
+    </section>
+    <section id="form">
+      <form class="mt-3" method="POST">
+        {% csrf_token %}
+        <h5 class="text-center">Action Tiket</h5>
+        <div class="mb-2">
+          <label for="" class="form-label">Note</label>
+          <textarea rows="5" name="note" id="note" class="form-control" required></textarea>
+        </div>
+        <div class="d-flex gap-2 justify-content-between">
+          <button type="reset" style="width: 100%;" class="btn btn-light border border-dark w-full">Clear Form</button>
+          <button type="submit" style="width: 100%;" class="btn btn-primary border w-full">Done Tiket</button>
+        </div>
+      </form>
+    </section>
+  </div>
+{% endblock %}

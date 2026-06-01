@@ -184,6 +184,20 @@ class TiketSubmitStatus(TemplateView):
     
                 
 ###################################################
+#                   TIKET HISTORY CLASS VIEW
+###################################################
+
+class TiketHistoryListView(LoginRequiredMixin, ListView):
+    model = TiketStatusHistory
+    login_url = "login"
+    template_name = "tiket/index_history.html"
+    context_object_name = "tikets"
+    
+    def get_queryset(self):
+        pass
+        return super().get_queryset()
+
+###################################################
 #                   TIKET CLASS VIEW
 ###################################################
 
@@ -289,19 +303,7 @@ class TiketListView(LoginRequiredMixin,ListView):
         # print(context)
         return context
     
-
-class TiketHistoryListView(LoginRequiredMixin, ListView):
-    model = TiketStatusHistory
-    login_url = "login"
-    template_name = "tiket/index_history.html"
-    context_object_name = "tikets"
     
-    def get_queryset(self):
-        pass
-        return super().get_queryset()
-    
-    
-
 class TiketDetailView(LoginRequiredMixin,DetailView):
     model           = TiketModel
     # form_class      = TiketForm
@@ -453,11 +455,16 @@ class TiketDeleteView(LoginRequiredMixin,DeleteView):
         messages.success(request, "Berhasil menghapus data")
         return super().delete(request, *args, **kwargs)
 
+
+###################################################
+#                   TIKET ACTION CLASS VIEW
+###################################################
+
 class TiketAssignView(LoginRequiredMixin, CreateView):
     model           = TiketActionModel
     template_name   = 'tiket/assign_form.html'
-    login_url       = '/login'
-    fields          = ['tiket', 'aktor', 'action_type','note']
+    login_url       = 'login'
+    fields          = ['tiket', 'aktor', 'action_type']
     http_method_names = ['post', 'get']
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
@@ -488,8 +495,10 @@ class TiketAssignView(LoginRequiredMixin, CreateView):
         
         form = TiketActionForm(copy_post_payload)
         
+        print(copy_post_payload)
         if not form.is_valid():
-            messages.error(req,"Data tidak sesuai, coba ulangi lagi")
+            err_mesg = form.errors
+            messages.error(req,err_mesg[0])
             return redirect('list-tiket')
         
         # Save Tiket action
@@ -515,6 +524,69 @@ class TiketAssignView(LoginRequiredMixin, CreateView):
         
         return redirect('list-tiket')
     
+class TiketActionList(LoginRequiredMixin,ListView):
+    model = TiketModel
+    template_name = "tiket-actions/index.html"
+    login_url = "login"
+    context_object_name = "tickets"
+    
+    def get_queryset(self):
+        logged_user = self.request.user
+        qr = TiketModel.objects.prefetch_related('action').filter(action__aktor=logged_user,status=TiketStatusEnum.ON_PROGRES.value).distinct()
+        # for t in qr.all():
+        #     print(t.action)
+        return qr
+
+class TiketActionView(LoginRequiredMixin, UpdateView):
+    model = TiketActionModel
+    template_name = "tiket-actions/form.html"
+    fields = ['note']
+    context_object_name = "action_tiket"
+    login_url = "login"
+    http_method_names = ['get','post']
+    success_url = reverse_lazy('list-action-tiket')
+    
+    
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        obj = context["action_tiket"]
+        
+        if hasattr(obj.tiket, "attachment"):
+            attch = obj.tiket.attachment
+            if attch:
+                context["attachment"] = attch
+                
+        else:
+            print("tiket tidak punya attachment")
+        
+        return context
+    
+    
+    def post(self, req, *args, **kwargs):
+        obj = self.get_object()
+        tiket = obj.tiket
+        
+        tiket.status = "done"
+        tiket.save()
+        
+        obj.note = req.POST.get("note")
+        obj.save()
+        
+        logg_user = self.request.user
+        TiketStatusHistory.objects.create(
+            tiket=tiket,
+            changed_by=logg_user,
+            note=f"Tiket sudah di eksekusi oleh {logg_user}"
+        )
+        
+        messages.success(req, "Testing update tiket action")
+        return redirect("/tiket/actions")
+        
+    
+###################################################
+#                   TIKET REVIEW CLASS VIEW
+###################################################
+
 class TiketReviewList(LoginRequiredMixin,ListView):
     model = TiketModel
     template_name = "tiket/list_review.html"
@@ -538,7 +610,7 @@ class TiketReviewList(LoginRequiredMixin,ListView):
         if filter_status == 'reviewed':
             filter_not_reviewed = False
         
-        qr = TiketModel.objects.filter(status=TiketStatusEnum.DONE.value,reviews__isnull=filter_not_reviewed)
+        qr = TiketModel.objects.filter(status=TiketStatusEnum.DONE.value,review__isnull=filter_not_reviewed)
         
         if filter_no_tiket:
             qr = qr.filter(no_tiket__icontains=filter_no_tiket)
@@ -551,7 +623,6 @@ class TiketReviewList(LoginRequiredMixin,ListView):
         }
         # print(context)
         return context
-    
     
 class TiketReviewDetail(LoginRequiredMixin,DetailView):
     model = TiketModel
@@ -580,8 +651,6 @@ class TiketReviewDetail(LoginRequiredMixin,DetailView):
         
         context["tiket_reviewed"] = tiket_review
         return context
-    
-    
     
 class TiketReviewForm(LoginRequiredMixin,CreateView):
     models = TiketReviewerModel

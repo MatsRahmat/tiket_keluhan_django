@@ -8,14 +8,19 @@
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
     <style>
+      {% comment %} Root CSS Untuk definisi variable {% endcomment %}
       :root {
         --c-sky-200: oklch(74.6% 0.16 232.661);
         --c-teal-400: oklch(77.7% 0.152 181.912);
         --c-slate-300: oklch(86.9% 0.022 252.894);
         --c-slate-200: oklch(96.8% 0.007 247.896);
         --c-slate-100: oklch(96.8% 0.007 247.896);
+        --c-lime-200: oklch(96.7% 0.067 122.328);
+        --c-emerald-200: oklch(90.5% 0.093 164.15);
+        --c-emerald-100: oklch(95% 0.052 163.051);
       }
       
+      {% comment %} Animasi {% endcomment %}
       @keyframes slideOutRight {
         0% {
           transform: translateX(50%);
@@ -25,10 +30,25 @@
         }
       }
 
+      {% comment %} Reguler Global Style {% endcomment %}
       .col-mini {
         width: 10%;
         text-align: center;
       }
+
+      {% comment %} Reset style pada anchor dengan attribute aria-label=row {% endcomment %}
+      a[aria-label="row"] {
+        color:  inherit;
+        text-decoration: none;
+        cursor: pointer;
+      }
+
+      a[aria-label="row"]:hover{
+      background: var(--c-emerald-100);
+      transition: all;
+      transition-duration: 200ms;
+    }
+
     </style>
 
     <title>
@@ -63,7 +83,7 @@
   </div>
 
     {% comment %}================ Toastify ================{% endcomment %}
-    <div id="toas-container" class="p-3" style="position: fixed; top: 0; right: 0; animation: slideOutRight 0.5s ease forwards;" {% if not messages %} hidden {% endif %} >
+    <div id="toas-container" class="p-3" style="position: fixed; top: 0; right: 0; animation: slideOutRight 0.5s ease forwards;" {% if not messages %} hidden {% endif %}>
       <div id="toas-mesg" class="p-2 rounded-3 alert" style="max-width: 24rem; cursor: pointer; border: #000; background: var(--c-sky-200);" title="Close">
         <div class="d-flex justify-content-between gap-2">
           <h4 class="text-truncate">Alert</h4>

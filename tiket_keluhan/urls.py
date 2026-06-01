@@ -24,6 +24,8 @@ from tiket_keluhan.views import (
     
     # =========== TIKET Action/Assignment ===========
     TiketAssignView,
+    TiketActionList,
+    TiketActionView,
     
     # =========== USER ===========
     UserListView,
@@ -49,13 +51,18 @@ urlpatterns = [
     path('tiket-review/<int:pk>/add', TiketReviewForm.as_view(), name='add-tiket-review'),
     path('tiket-review/<int:pk>/detail', TiketReviewDetail.as_view(), name='detail-tiket-review'),
     
+    # ================================ TIKET ACTION ================================
+    path('tiket/actions', TiketActionList.as_view(), name="list-action-tiket"),  
+    path('tiket/<int:pk>/action-detail', TiketActionView.as_view(), name="detail-action-tiket"),
+    path('tiket/<int:pk>/assign', TiketAssignView.as_view(), name="assign-tiket"),
+    
     # ================================ TIKET ================================
     path('tiket', TiketListView.as_view(), name="list-tiket"),
     path('new-tiket', TiketCreateView.as_view(), name="create-tiket"), # un-auth page
     path('tiket/<int:pk>/detail', TiketDetailView.as_view(), name="detail-tiket"),
     path('tiket/<int:pk>/update', TiketUpdateView.as_view(), name="update-tiket"),
     path('tiket/<int:pk>/delete', TiketDeleteView.as_view(), name="delete-tiket"),
-    path('tiket/<int:pk>/assign', TiketAssignView.as_view(), name="assign-tiket"),  
+    
     # ================================ USER ================================
     path('user', UserListView.as_view(), name="user-list"),
     path('user/add', UserCreateView.as_view(), name="user-create"),

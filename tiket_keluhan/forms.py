@@ -18,7 +18,7 @@ class AuthForm(forms.Form):
         }
     
 class TiketForm(forms.ModelForm):
-    file = forms.FileField(widget=forms.ClearableFileInput(attrs={"class": "form-control", "required": False}))
+    file = forms.FileField(required=False,widget=forms.ClearableFileInput(attrs={"class": "form-control"}))
     class Meta:
         model = TiketModel
         fields = ['login_id','subject', 'description', 'file']
@@ -26,6 +26,7 @@ class TiketForm(forms.ModelForm):
             "login_id": forms.TextInput(attrs={"class": "form-control"}),
             "subject": forms.TextInput(attrs={"class": "form-control"}),
             "description": forms.Textarea(attrs={"class": "form-control"}),
+            'file': forms.FileInput(attrs={"class": "form-control"})
         }
         
 
@@ -54,7 +55,7 @@ class UserForm(forms.ModelForm):
 class TiketActionForm(forms.ModelForm):
     class Meta:
         model = TiketActionModel
-        fields = ['tiket', 'aktor', 'action_type','note']
+        fields = ['tiket', 'aktor', 'action_type']
         
         
         

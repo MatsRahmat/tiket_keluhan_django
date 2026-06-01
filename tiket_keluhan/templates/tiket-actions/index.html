@@ -1,0 +1,60 @@
+{% extends 'content_layout.html' %}
+
+{% block title %}
+  Tiket
+{% endblock %}
+
+{% block content %}
+  <style>
+    a[aria-label="row"]:hover{
+      background: var(--c-emerald-100);
+      transition: all;
+      transition-duration: 200ms;
+    }
+  </style>
+  <div>
+    <h2>Tiket</h2>
+    <hr />
+    <div class="card" id="filter-section">
+      <form class="card-body row" method="get" action="">
+        <div class="col">
+          <span style="font-size: smaller;">No Tiket</span>
+          <input type="text" id="tiket_no" name="tiket_no" value="{{ filter.tiket_no }}" class="form-control" placeholder="No Tiket" />
+        </div>
+        <div class="col">
+          <span style="font-size: smaller;">Start date</span>
+          <input type="date" id="start_date" name="start_date" value="{{ filter.start_date }}" class="form-control" />
+        </div>
+        <div class="col">
+          <span style="font-size: smaller;">End date</span>
+          <input type="date" id="end_date" name="end_date" value="{{ filter.end_date }}" class="form-control" />
+        </div>
+        <div class="col-2 d-flex justify-content-center align-items-end">
+          <button role="button" type="submit" class="btn btn-primary" style="width: 100%;">Cari</button>
+        </div>
+      </form>
+    </div>
+    <hr />
+    <div class="py-2" id="body-section" style="height: calc(50dvh); overflow-y: auto; overflow-x: hidden;">
+      {% if tickets %}
+        {% for tiket in tickets %}
+          <div class="border-top border-bottom px-2">
+            <a href="{% url 'detail-action-tiket' tiket.action.id %}" class="row" aria-label="row">
+              <div class="col-8">
+                <p class="mb-1" style="color:black;">#{{ tiket }}</p>
+                <h5>{{ tiket.subject }}</h5>
+                <p>{{ tiket.description }}</p>
+              </div>
+              <div class="col-4 d-flex align-items-center gap-3 justify-content-around">
+                <p>status: <br> <span class="badge bg-primary fs-6">{{ tiket.status }}</span></p>
+                <p>Dibuat pada: <br> <span>{{ tiket.created_at }}</span></p>
+              </div>
+            </a>
+          </div>
+        {% endfor %}
+      {% else %}
+        <h5 class="text-center my-2">Tidak ada tiket baru</h5>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}
