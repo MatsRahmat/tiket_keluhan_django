@@ -20,11 +20,11 @@
           <span style="font-size: smaller;">Status</span>
           <select name="status" id="status" class="form-select">
             <option value="" selected>Semua Status</option>
-            <option value="sent" {% if filter.status == 'sent' %} selected="selected" {% endif %}>Sent/Open</option>
-            <option value="approved" {% if filter.status == 'approved' %} selected="selected" {% endif %}>Approved</option>
-            <option value="on progres" {% if filter.status == 'on progres' %} selected="selected" {% endif %}>On Progres</option>
-            <option value="done" {% if filter.status == 'done' %} selected="selected" {% endif %}>Done</option>
-            <option value="reject" {% if filter.status == 'reject' %} selected="selected" {% endif %}>Reject</option>
+            <option value="sent" {% if filter.status == 'sent' %} selected {% endif %}>Sent/Open</option>
+            <option value="approved" {% if filter.status == 'approved' %} selected {% endif %}>Approved</option>
+            <option value="on progres" {% if filter.status == 'on progres' %} selected {% endif %}>On Progres</option>
+            <option value="done" {% if filter.status == 'done' %} selected {% endif %}>Done</option>
+            <option value="reject" {% if filter.status == 'reject' %} selected {% endif %}>Reject</option>
           </select>
           {% comment %} <input type="text" id="status" name="login_id" value="{{ filter.login_id }}" class="form-control" placeholder="Login Id" /> {% endcomment %}
         </div>

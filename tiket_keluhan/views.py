@@ -1,8 +1,10 @@
 import json, os, uuid
 from datetime import date, timedelta
 from typing import Any
+
 from django.views import View
 from django.views.generic.base import TemplateView
+from django.utils.timezone import now as djnow
 from django.views.generic import (
     DetailView, UpdateView,ListView, CreateView, DeleteView
 )
@@ -75,6 +77,7 @@ def index(req: request):
     session = req.session.get("login_id")
     list_tiket = TiketModel.objects.all()
     return render(req, "home/index.html", {"tickets": list_tiket})
+    
 
 def logout_view(req: request):
     del req.session['username']
@@ -170,13 +173,37 @@ class AuthView(View):
         
 class DashboardView(LoginRequiredMixin,TemplateView):
     template_name = "home/index.html"
-    login_url = "/login"
+    login_url = "login"
     
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
+        logged_user = self.request.user
+        logged_role = logged_user.role
         context = super().get_context_data(**kwargs)
-        context[""] = None
+        
+        today = djnow().today()
+        
+        if logged_role == RoleEnum.diretur.value:
+            context["total_tiket"] = TiketModel.objects.count()
+            context["today_tiket"] = TiketModel.objects.filter(created_at__date=today).count()
+            context["reviwed_tiket"] = TiketModel.objects.filter(status__in=[TiketStatusEnum.DONE.value,TiketStatusEnum.REJECT.value],review__isnull=True).count()
+            context["asign_tiket"] = TiketModel.objects.filter(status=TiketStatusEnum.ON_PROGRES.value).count()
+            context["reject_tiket"] = TiketModel.objects.filter(status=TiketStatusEnum.REJECT.value).count()
+            context["total_user"] = TiketModel.objects.count()
+            
+        elif logged_role == RoleEnum.operator.value:
+            context["total_tiket"] = TiketModel.objects.count()
+            context["today_tiket"] = TiketModel.objects.filter(created_at__date=today).count()
+            context["reviwed_tiket"] = TiketModel.objects.filter(status__in=[TiketStatusEnum.DONE.value,TiketStatusEnum.REJECT.value],review__isnull=True).count()
+            context["asign_tiket"] = TiketModel.objects.filter(status=TiketStatusEnum.ON_PROGRES.value).count()
+            context["self_asign_tiket"] = TiketModel.objects.filter(status=TiketStatusEnum.ON_PROGRES.value,action__aktor=logged_user).count()
+        elif logged_role == RoleEnum.staff.value:
+            context["self_asign_tiket"] = TiketModel.objects.filter(status=TiketStatusEnum.ON_PROGRES.value,action__aktor=logged_user).count()
+        else:
+            pass
+        # context[""] = None
         # TODO: Memuat data summary dan statistik dari tiket yg ada 
+        print(context)
         return context
     
     
@@ -606,19 +633,34 @@ class TiketReviewList(LoginRequiredMixin,ListView):
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         # =========== FILTER ===========
-        filter_status = self.request.GET.get("status", "")
+        filter_status_tiket = self.request.GET.get("status", "")
+        filter_status_review = self.request.GET.get("status_review", "")
         filter_no_tiket = self.request.GET.get("tiket_no", "")
         
         # =========== BASE CONTEXT ===========
         context = super().get_context_data(**kwargs)
         
         filter_not_reviewed = True
-        if filter_status == 'reviewed':
+        if filter_status_review == 'reviewed':
             filter_not_reviewed = False
         
         # Mencari yg sudah done atau reject
-        status_filter = [TiketStatusEnum.DONE.value, TiketStatusEnum.REJECT.value]
+        status_filter = []
+        if filter_status_tiket == "done":
+            status_filter.append(TiketStatusEnum.DONE.value)
+            
+        elif filter_status_tiket == "reject":
+            status_filter.append(TiketStatusEnum.REJECT.value)
+            
+        else:
+            # All status done or reject
+            status_filter.append(TiketStatusEnum.DONE.value)
+            status_filter.append(TiketStatusEnum.REJECT.value)
+            
+            
+            
         qr = TiketModel.objects.filter(status__in=status_filter, review__isnull=filter_not_reviewed)
+        
         
         if filter_no_tiket:
             qr = qr.filter(no_tiket__icontains=filter_no_tiket)
@@ -626,8 +668,9 @@ class TiketReviewList(LoginRequiredMixin,ListView):
         context["tickets"] = qr.all()
         
         context["filter"] = {
-            "status": filter_status,
-            "tiket_no": filter_no_tiket,
+            "status_review" : filter_status_review,
+            "tiket_no"      : filter_no_tiket,
+            "status"        : filter_status_tiket
         }
         return context
     

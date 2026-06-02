@@ -6,8 +6,75 @@
 {% endblock %}
 
 {% block content %}
+  <style>
+    a.card {
+      width: 10rem;
+      text-decoration: none;
+      color: #000;
+      cursor: pointer;
+      transition: all;
+      transition-duration: 150ms;
+      &:hover{
+        background-color: var(--c-emerald-100);
+      }
+    }
+  </style>
   <div class="">
     <h2>Dashboard</h2>
-    <hr>
+    <hr />
+    <section class="card">
+      <div class="card-body">
+        <div class="d-flex flex-warp justify-content-around gap-2" style="">
+          {% comment %} ============ Total Tiket ============ {% endcomment %}
+          {% if total_tiket %}
+            <a href="{% url 'list-tiket' %}" class="card p-2">
+              <h5>Total Tiket</h5>
+              <hr />
+              <h2 class="text-end">{{ total_tiket }}</h2>
+            </a>
+          {% endif %}
+          {% comment %} ============ Total Tiket ============ {% endcomment %}
+          {% if today_tiket %}
+            <a href="{% url 'list-tiket' %}" class="card p-2">
+              <h5>Today Tiket</h5>
+              <hr />
+              <h2 class="text-end">{{ today_tiket }}</h2>
+            </a>
+          {% endif %}
+          {% comment %} ============ Tiket need review ============ {% endcomment %}
+          {% if reviwed_tiket %}
+            <a href="{% url 'list-tiket-review' %}" class="card p-2">
+              <h5>Need Review Tiket</h5>
+              <hr />
+              <h2 class="text-end">{{ reviwed_tiket }}</h2>
+            </a>
+          {% endif %}
+          {% comment %} ============ Total Tiket assign ============ {% endcomment %}
+          {% if asign_tiket %}
+            <a href="{% url 'list-action-tiket' %}" class="card p-2">
+              <h5>Total Asign Tiket</h5>
+              <hr />
+              <h2 class="text-end">{{ asign_tiket }}</h2>
+            </a>
+          {% endif %}
+          {% comment %} ============ Total Tiket Reject ============ {% endcomment %}
+          {% if reject_tiket %}
+            <a href="{% url 'list-tiket-review' %}?status_review=reviewed&status=reject" class="card p-2">
+              <h5>Total Riject Tiket</h5>
+              <hr />
+              <h2 class="text-end">{{ reject_tiket }}</h2>
+            </a>
+          {% endif %}
+          {% comment %} ============ Total User ============ {% endcomment %}
+          {% if total_user %}
+            <a href="{% url 'user-list' %}" class="card p-2">
+              <h5>Total User</h5>
+              <hr />
+              <h2 class="text-end">{{ total_user }}</h2>
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </section>
   </div>
 {% endblock %}

@@ -14,12 +14,20 @@
           <span style="font-size: smaller;">No Tiket</span>
           <input type="text" id="tiket_no" name="tiket_no" value="{{ filter.tiket_no }}" class="form-control" placeholder="No Tiket" />
         </div>
-          <div class="col">
-            <span style="font-size: smaller;">Status</span>
-            <select name="status" id="status" class="form-select">
-              <option value="not-reviewed" class="text-capitalize" {% if filter.status == 'not-reviewed' %} selected="selected" {% endif %} >not yet reviewed</option>
-              <option value="reviewed" class="text-capitalize" {% if filter.status == 'reviewed' %} selected="selected" {% endif %} >reviewed</option>
-            </select>
+        <div class="col">
+          <span style="font-size: smaller;">Status Tiket</span>
+          <select name="status" id="status" class="form-select">
+            <option value="" selected>All Status</option>
+            <option value="done" class="text-capitalize" {% if filter.status == 'done' %} selected="selected" {% endif %} >Done</option>
+            <option value="reject" class="text-capitalize" {% if filter.status == 'reject' %} selected="selected" {% endif %} >Reject</option>
+          </select>
+        </div>
+        <div class="col">
+          <span style="font-size: smaller;">Status Review</span>
+          <select name="status_review" id="status" class="form-select">
+            <option value="not-reviewed" class="text-capitalize" {% if filter.status_review == 'not-reviewed' %} selected="selected" {% endif %} >not yet reviewed</option>
+            <option value="reviewed" class="text-capitalize" {% if filter.status_review == 'reviewed' %} selected="selected" {% endif %} >reviewed</option>
+          </select>
         </div>
         <div class="col-2 d-flex justify-content-center align-items-end">
           <button role="button" type="submit" class="btn btn-primary" style="width: 100%;">Cari</button>
