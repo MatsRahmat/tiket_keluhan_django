@@ -2,7 +2,9 @@ asgiref==3.11.1
 click==8.3.1
 colorama==0.4.6
 Django==6.0.4
+dotenv==0.9.9
 h11==0.16.0
+python-dotenv==1.2.2
 sqlparse==0.5.5
 tzdata==2026.2
 uvicorn==0.42.0

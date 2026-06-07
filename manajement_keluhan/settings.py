@@ -12,10 +12,41 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+load_dotenv(".env")
+env_val = {}
 
 def load_env():
     print("============= load custom env =============")
+    env_val["NODE_MODE"]        = os.getenv("NODE_MODE", "dev") # dev | prd
+    env_val["SECRET_KEY"]       = os.getenv("SECRET_KEY", "") # Django secret key
+    env_val["ALLOWED_HOST"]     = os.getenv("ALLOWED_HOST", "") # string list of ip, sep by comas (,). e.g 192.168.20.1,127.0.0.1,*,
     
+    # Database Config from env
+    env_val["DB_ENGINE"]        = os.getenv("DB_ENGINE")
+    env_val["DB_HOST"]          = os.getenv("DB_HOST")
+    env_val["DB_PORT"]          = os.getenv("DB_PORT")
+    env_val["DB_USERNAME"]      = os.getenv("DB_USERNAME")
+    env_val["DB_PASSWORD"]      = os.getenv("DB_PASSWORD")
+    env_val["DB_NAME"]          = os.getenv("DB_NAME", "Tiket_Keluhan")
+    env_val["DB_SQLITE_PATH"]   = os.getenv("DB_SQLITE_PATH")
+    
+    # print(env_val)
+    print("Done reading config.\nDB ENGINE\t: %(DB_ENGINE)s\r\nNODE MODE\t: %(NODE_MODE)s" % env_val)
+    print("============= end load config =============")
+    
+
+def get_allowed_host() -> list:
+    global env_val
+    
+    list_host = env_val["ALLOWED_HOST"]
+    list_host = list_host.split(",")
+    
+    if len(list_host) < 1:
+        return []
+    return list_host
+
 load_env()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,12 +57,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-7v7u2n+)ay&uc%kr&&5dj5q-ba+-97ypd50*i&570m(x*+bcv5'
+SECRET_KEY = env_val["SECRET_KEY"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = True if env_val["NODE_MODE"] == "dev" else False
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = get_allowed_host()
+
 
 
 # Application definition
@@ -84,12 +116,56 @@ WSGI_APPLICATION = 'manajement_keluhan.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+def get_database_cfg() -> dict:
+    global env_val
+    
+    default_cfg = {}
+    
+    if env_val["DB_ENGINE"] == "sqlite" and env_val["DB_SQLITE_PATH"]:
+        default_cfg["ENGINE"] = "django.db.backends.sqlite3"
+        default_cfg["NAME"] = BASE_DIR / env_val["DB_SQLITE_PATH"]
+        
+    elif env_val["DB_ENGINE"] == "postgresql":
+        default_cfg["ENGINE"]   = "django.db.backends.postgresql"
+        default_cfg["NAME"]     = env_val["DB_USERNAME"]
+        default_cfg["USER"]   = "django.db.backends.postgresql"
+        default_cfg["PASSWORD"]   = "django.db.backends.postgresql"
+        default_cfg["HOST"]   = "django.db.backends.postgresql"
+        default_cfg["PORT"]   = "django.db.backends.postgresql"
+        
+    else:
+        print("Menggunakan db engine lain selain sqlite atau postgres")
+        pass
+
+    return {
+        'default': default_cfg,    
+    }
+    
+
+# print(get_database_cfg())
+
+DATABASES = get_database_cfg()
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': BASE_DIR / 'database/db.sqlite3',
     }
 }
+
+"""
+# Database Postgre
+DATABASES = {
+    "default": {
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "tiket_keluhan",
+        "USER": "postgre",
+        "PASSWORD": "postgre",
+        "HOST": "127.0.0.1",
+        "PORT": "5432",
+    }
+}
+"""
 
 
 # Password validation

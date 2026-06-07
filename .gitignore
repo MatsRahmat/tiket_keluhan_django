@@ -3,3 +3,4 @@ database/*
 *.pyc
 static/assets/images
 media/*
+.env
