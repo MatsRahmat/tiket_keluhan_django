@@ -22,7 +22,8 @@ from tiket_keluhan.forms import (
     TiketForm,
     UserForm,
     TiketActionForm,
-    TiketReviewForm
+    TiketReviewForm,
+    UserUpdateForm,
 )
 
 from tiket_keluhan.utils import (
@@ -74,6 +75,7 @@ class MesgTitle:
 
 @login_required(login_url="/login")
 def index(req: request):
+    """Tidak digunakan"""
     session = req.session.get("login_id")
     list_tiket = TiketModel.objects.all()
     return render(req, "home/index.html", {"tickets": list_tiket})
@@ -87,8 +89,10 @@ def logout_view(req: request):
     logout(req)
     return redirect("/login")
 
+
 @login_required(login_url="/login")
 def tiket_update_delete(req, id):
+    """Tidak digunakan"""
     action = req.GET.get("action")
     if action == "edit":
         tiket = get_object_or_404(TiketModel,id=id)
@@ -105,6 +109,7 @@ def tiket_update_delete(req, id):
 #                   AUTH CLASS VIEW
 ###################################################
 class AuthView(View):
+    
     def get(self, req, *args, **kwargs):
         login_session = req.session.get("is_login")
         if login_session is not None:
@@ -119,7 +124,7 @@ class AuthView(View):
         password = req.POST.get("password", None)
         context = {}
         if login_id and password:
-            print("logi_id", login_id, "password", password, sep="|")
+            # print("logi_id", login_id, "password", password, sep="|")
             try:
                 auth_user = CustomUserModel.objects.get(login_id=login_id)
             except CustomUserModel.DoesNotExist as e:
@@ -172,8 +177,8 @@ class AuthView(View):
 ###################################################
         
 class DashboardView(LoginRequiredMixin,TemplateView):
-    template_name = "home/index.html"
-    login_url = "login"
+    template_name   = "home/index.html"
+    login_url       = "login"
     
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
@@ -201,8 +206,6 @@ class DashboardView(LoginRequiredMixin,TemplateView):
             context["self_asign_tiket"] = TiketModel.objects.filter(status=TiketStatusEnum.ON_PROGRES.value,action__aktor=logged_user).count()
         else:
             pass
-        # context[""] = None
-        # TODO: Memuat data summary dan statistik dari tiket yg ada 
         print(context)
         return context
     
@@ -216,15 +219,24 @@ class TiketSubmitStatus(TemplateView):
 ###################################################
 
 class TiketHistoryListView(LoginRequiredMixin, ListView):
-    model = TiketStatusHistory
-    login_url = "login"
-    template_name = "tiket/index_history.html"
+    model               = TiketStatusHistory
+    template_name       = "tiket/index_history.html"
     context_object_name = "tikets"
+    login_url           = "login"
     
-    def get_queryset(self):
-        pass
-        return super().get_queryset()
+    # def get_queryset(self):
+    #     pass
+    #     return super().get_queryset()
+    
+    def get_context_data(self, **kwargs) -> dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        # context[""] = 
+        print(context)
+        return context
+    
 
+
+# TODO: Detail History view
 ###################################################
 #                   TIKET CLASS VIEW
 ###################################################
@@ -267,7 +279,7 @@ class TiketListView(LoginRequiredMixin,ListView):
             # print("Role tidak valid")
             pass
         
-        print(tikets)
+        # print(tikets)
         return tikets
     
     
@@ -331,12 +343,11 @@ class TiketListView(LoginRequiredMixin,ListView):
         # print(context)
         return context
     
-    
 class TiketDetailView(LoginRequiredMixin,DetailView):
-    model           = TiketModel
+    model               = TiketModel
     # form_class      = TiketForm
-    template_name   = "tiket/detail.html"
-    login_url       = "login"  # Fallback url ketika belum login
+    template_name       = "tiket/detail.html"
+    login_url           = "login"  # Fallback url ketika belum login
     context_object_name = 'tiket'
     
     # Untuk menampilkan form dan mengisinya dengan data yg didapat
@@ -353,7 +364,7 @@ class TiketDetailView(LoginRequiredMixin,DetailView):
 class TiketCreateView(CreateView):
     model           = TiketModel
     form_class      = TiketForm
-    template_name   ="tiket/form_tiket.html"
+    template_name   = "tiket/form_tiket.html"
     success_url     = reverse_lazy("message")
     
     def form_valid(self, form):
@@ -389,17 +400,19 @@ class TiketCreateView(CreateView):
         messages.success(self.request, "Tiket Berhasil dibuat")
         return response
     
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        return context
+    # def get_context_data(self, **kwargs) -> dict[str, Any]:
+    #     context = super().get_context_data(**kwargs)
+    #     return context
     
 class TiketUpdateView(LoginRequiredMixin,UpdateView):
+    """Tidak digunakan"""
+    login_url           = "login" # Fallback url ketika belum login
+    http_method_names   = ['post']
+    
     # model       = TiketModel
     # fields      = ['login_id','subject', 'description']
     # template    ="tiket/form_tiket.html"
     # success_url = reverse_lazy("tiket-list")
-    login_url   = "login" # Fallback url ketika belum login
-    http_method_names = ['post']
     
     # def get_context_data(self, **kwargs) -> dict[str, Any]:
     #     context = super().get_context_data(**kwargs)
@@ -477,17 +490,21 @@ class TiketDeleteView(LoginRequiredMixin,DeleteView):
     login_url       = "login" # Fallback url ketika belum login
     http_method_names = ['post']
     
-    def delete(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
+        """
+        Untuk Delete Tiket
+        """
         tiket_obj = self.get_object()
-        logged_user_id = self.request.sessions.get('user_id')
-        logged_user = CustomUserModel.objects.get(id=logged_user_id)
+        logged_user = self.request.user
+        
         # Membuat tiket history baru untuk aksi ini
         TiketStatusHistory.objects.create(
             tiket=tiket_obj, 
-            note="Tiket dihapus",
-            changed_by=logged_user)
-        messages.success(request, "Berhasil menghapus data")
-        return super().delete(request, *args, **kwargs)
+            note=f"Tiket {tiket_obj}-{tiket_obj.subject} berhasil dihapus oleh {logged_user.username}",
+            changed_by=logged_user,
+            )
+        messages.success(self.request, "Berhasil menghapus data")
+        return super().post(request, *args, **kwargs)
 
 
 ###################################################
@@ -572,13 +589,13 @@ class TiketActionList(LoginRequiredMixin,ListView):
         return qr
 
 class TiketActionView(LoginRequiredMixin, UpdateView):
-    model = TiketActionModel
-    template_name = "tiket-actions/form.html"
-    fields = ['note']
+    model               = TiketActionModel
+    template_name       = "tiket-actions/form.html"
+    fields              = ['note']
+    login_url           = "login"
+    success_url         = reverse_lazy('list-action-tiket')
+    http_method_names   = ['get','post']
     context_object_name = "action_tiket"
-    login_url = "login"
-    http_method_names = ['get','post']
-    success_url = reverse_lazy('list-action-tiket')
     
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
@@ -613,7 +630,7 @@ class TiketActionView(LoginRequiredMixin, UpdateView):
             note=f"Tiket sudah di eksekusi oleh {logg_user}"
         )
         
-        messages.success(req, "Testing update tiket action")
+        messages.success(req, "Success done tiket %s " % tiket)
         return redirect("/tiket/actions")
         
     
@@ -622,9 +639,9 @@ class TiketActionView(LoginRequiredMixin, UpdateView):
 ###################################################
 
 class TiketReviewList(LoginRequiredMixin,ListView):
-    model = TiketModel
-    template_name = "tiket-review/index.html"
-    login_url = "login"
+    model           = TiketModel
+    template_name   = "tiket-review/index.html"
+    login_url       = "login"
     
     # def get_queryset(self):
     #     # qr = TiketModel.objects.filter(status=TiketStatusEnum.DONE.value,reviews__isnull=True)
@@ -675,9 +692,9 @@ class TiketReviewList(LoginRequiredMixin,ListView):
         return context
     
 class TiketReviewDetail(LoginRequiredMixin,DetailView):
-    model = TiketModel
-    template_name = "tiket-review/detail.html"
-    login_url = "login"
+    model               = TiketModel
+    template_name       = "tiket-review/detail.html"
+    login_url           = "login"
     context_object_name = "tiket"
     
     # def get_queryset(self):
@@ -709,11 +726,11 @@ class TiketReviewDetail(LoginRequiredMixin,DetailView):
         return context
     
 class TiketReviewForm(LoginRequiredMixin,CreateView):
-    models = TiketReviewerModel
-    form_class = TiketReviewForm
-    template_name = "tiket-review/form.html"
-    login_url = "login"
-    success_url = "/tiket-review"
+    models          = TiketReviewerModel
+    form_class      = TiketReviewForm
+    template_name   = "tiket-review/form.html"
+    login_url       = "login"
+    success_url     = reverse_lazy("list-tiket-review")
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs);
@@ -743,16 +760,17 @@ class TiketReviewForm(LoginRequiredMixin,CreateView):
         success_mesg += f" oleh {logged_user}"
         TiketStatusHistory.objects.create(
             tiket=review_tiket,
-            aktor=logged_user,
+            changed_by=logged_user,
             note=success_mesg
         )
         return super().form_valid(form)
     
 class TiketReviewActionView(LoginRequiredMixin, UpdateView):
-    model = TiketModel
-    fields = ['status']
-    login_url = "login"
-    http_method_names = ['post']
+    """Tidak digunakan"""
+    model               = TiketModel
+    fields              = ['status']
+    login_url           = "login"
+    http_method_names   = ['post']
     
     def post(self, req, *args, **kwargs):
         action_status = self.request.POST.get("action","")
@@ -796,27 +814,25 @@ class UserCreateView(LoginRequiredMixin,CreateView):
     model               = CustomUserModel
     template_name       = "user/user_form.html"
     form_class          = UserForm
-    http_method_names   = ["get", "post"]
+    # http_method_names   = ["get", "post"]
     success_url         = reverse_lazy("user-list")
     login_url           = "login" # Fallback url ketika belum login
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
         context["action"] = "add"
-        print("Get context")
+        # print("Get context")
         return context
     
-    # def get_form_kwargs(self):
-    #     kwargs = super().get_form_kwargs()
-    #     kwargs["roles"] = [(r.value, r.name.replace("_", " ").title()) for r in RoleEnum][1:]
-    #     print("set kwargs")
-    #     return kwargs
-
+    def form_valid(self, form):
+        messages.success(self.request, "Berhasil membuat user baru")
+        return super().form_valid(form)
+    
 class UserUpdateView(LoginRequiredMixin,UpdateView):
     model               = CustomUserModel
     template_name       = "user/user_form.html"
-    form_class          = UserForm
-    http_method_names   = ["get", "post"]
+    form_class          = UserUpdateForm
+    # http_method_names   = ["get", "post"]
     success_url         = reverse_lazy("user-list")
     login_url           = "login" # Fallback url ketika belum login
     
@@ -827,14 +843,24 @@ class UserUpdateView(LoginRequiredMixin,UpdateView):
         return context
     
     def form_valid(self, form):
+        old_obj = self.get_object()
+        
         user = form.save(commit=False)
-        password = self.request.POST.get("password")
-        if not password:
-            form.add_error("Password required")
-        # clean_form = form.clea
+        password = form.cleaned_data.get("password")
+        
+        if password:
+            #* jika value password dikirim dari form, maka gunakan hash function sebelum di simpan
+            user.password = make_password(password)
+            
+        else:
+            #* jika value password kosong dari form, maka gunakan value yg sudah ada pada database untuk di simpan.
+            user.password = old_obj.password
+        
+        print(user.password)
+        user.save()
+        messages.success(self.request, "Berhasil mengubah user")
         return super().form_valid(form)
     
-
 class UserDeleteView(LoginRequiredMixin,DeleteView):
     model         = CustomUserModel
     template_name = "user/list_user.html"
@@ -847,15 +873,19 @@ class UserDeleteView(LoginRequiredMixin,DeleteView):
         context = context_modal_delete(context, "Hapus User", f"Apakah anda yakin ingin menghapus {obj.username}?", f"/user/{obj.id}/delete", "/user") 
         return context
     
-    def delete(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         obj = self.get_object()
-        # Validasi goes here
-        if obj.id == request.user.user_id:
-            messages.error(request, "TIdak dapat menghapus akun milik sendiri")
-        elif obj.role == RoleEnum.diretur.value:
-            messages.error(request, "Tidak dapat menghapus user dengan role direktur")
-        else:
-            super().delete(request, *args, **kwargs)
         
-        return reverse_lazy('user-list')
+        # Validasi goes here
+        if obj == self.request.user:
+            print("Obj target logged user")
+            messages.error(self.request, "Tidak dapat menghapus akun milik sendiri")
+            return redirect('/user')
+            
+        if obj.role == RoleEnum.diretur.value:
+            messages.error(self.request, "Tidak dapat menghapus user dengan role direktur")
+            return redirect('/user')
+            
+        messages.success(self.request, "Berhasil menghapus user %s" % obj.username)        
+        return super().post(request, *args, **kwargs)
         

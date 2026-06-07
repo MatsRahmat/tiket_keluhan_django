@@ -125,7 +125,7 @@ class ReviewerModel(models.Model):
 #           TIKET HISTORY
 # ==================================  
 class TiketStatusHistory(models.Model):
-    tiket = models.ForeignKey(TiketModel, on_delete=models.CASCADE, related_name="status_history")
+    tiket = models.ForeignKey(TiketModel, on_delete=models.SET_NULL, null=True, related_name="status_history")
     changed_by = models.ForeignKey(CustomUserModel, on_delete=models.SET_NULL, null=True, related_name="status_change")
     note = models.TextField('note', blank=True, null=True)
     timestamp = models.DateTimeField(auto_now_add=True)

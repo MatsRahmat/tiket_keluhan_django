@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" />
     <link rel="stylesheet" href="{% static 'css/style.css' %}" />
     <style>
+
       {% comment %} Root CSS Untuk definisi variable {% endcomment %}
       :root {
         --c-sky-200: oklch(74.6% 0.16 232.661);
@@ -18,6 +19,8 @@
         --c-lime-200: oklch(96.7% 0.067 122.328);
         --c-emerald-200: oklch(90.5% 0.093 164.15);
         --c-emerald-100: oklch(95% 0.052 163.051);
+      
+        --content-height: calc(68dvh - 2rem);
       }
       
       {% comment %} Animasi {% endcomment %}
@@ -44,10 +47,16 @@
       }
 
       [aria-label="row"]:hover{
-      background: var(--c-emerald-100);
-      transition: all;
-      transition-duration: 200ms;
-    }
+        background: var(--c-emerald-100);
+        transition: all;
+        transition-duration: 200ms;
+      }
+
+      .content-table {
+        overflow-y: auto;
+        overflow-x: hidden;
+        height: var(--content-height);
+      }
 
     </style>
 
@@ -90,9 +99,20 @@
           {% comment %} <h4 class="text-truncate">{{ toast.title }}</h4> {% endcomment %}
           {% comment %} <button id="btn-toast-hidden" class="btn bg-light border rounded-3">X</button> {% endcomment %}
         </div>
-        <ul>
+        <ul style="padding-left: 1px;">
           {% for mesg in messages %}
-          <li style="list-style-type: none;" class="text-{{ mesg.tags }}">{{ mesg }}</li>
+            <li style="list-style-type: none;">
+              <div class="d-inline">
+                {% if mesg.tags == 'success' %}
+                  <img src="{% static 'assets/icons/success.svg' %}" alt="Success">
+                {% elif mesg.tags == 'warning' %}
+                  <img src="{% static 'assets/icons/warning.svg' %}" alt="Warning">
+                {% else %}
+                  <img src="{% static 'assets/icons/error.svg' %}" alt="Error">
+                {% endif %}
+              </div>
+              <span  class="text-{{ mesg.tags }}" style="color: {% if mesg.tags == 'error' %} #ff0000 {% elif mesg.tags == 'success' %} #00ff00 {% else %} #ffff00 {% endif %}" >{{ mesg }}</span>
+            </li>
           {% endfor %}
         </ul>
         {% comment %} <p>{{ toast.mesg }}</p> {% endcomment %}

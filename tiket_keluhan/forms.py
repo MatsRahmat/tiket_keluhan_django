@@ -40,6 +40,23 @@ class UserForm(forms.ModelForm):
             'password': forms.PasswordInput(attrs={"class": "form-control"}),
             'role': forms.Select(attrs={"class": "form-control"}, choices=[(r.value, r.name.replace("_", " ").title()) for r in RoleEnum][1:]),
         }
+        
+class UserUpdateForm(forms.ModelForm):
+    password = forms.CharField(
+        required=False,
+        widget=forms.PasswordInput(attrs={"class": "form-control"}),
+        )
+    
+    class Meta:
+        model = CustomUserModel
+        fields = ['login_id','username', 'password','role']
+        widgets = {
+            'login_id': forms.TextInput(attrs={"class": "form-control"}),
+            'username': forms.TextInput(attrs={"class": "form-control"}),
+            # 'password': forms.PasswordInput(attrs={"class": "form-control"}),
+            'role': forms.Select(attrs={"class": "form-control"}, choices=[(r.value, r.name.replace("_", " ").title()) for r in RoleEnum][1:]),
+        }
+    
     
     # def __init__(self, *args, **kwargs):
     #     roles = kwargs.pop("roles", None)

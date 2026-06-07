@@ -42,7 +42,7 @@
       </form>
     </div>
     <hr />
-    <div class="" id="body-section" style="height: calc(50dvh); overflow-y: auto;">
+    <div class="content-table" id="body-section" style="height: var(--content-height) overflow-y: auto; overflow-x: hidden;">
       {% if tickets %}
         {% for tiket in tickets %}
           <div class="border-top border-bottom px-2">
@@ -71,7 +71,7 @@
                   </p>
                 </div>
                 <div class="col">
-                  <button data-delete="{{ tiket.id }}" data-delete-url="/tiket/{{ tiket.id }}/delete" data-delete-mesg="Apakah anda yakin ingin menghapus tiket {{ tiket.no_tiket }}" class="btn btn-danger">Hapus</button>
+                  <button data-delete="{{ tiket.id }}" data-delete-url="/tiket/{{ tiket.id }}/delete" data-delete-mesg="Apakah anda yakin ingin menghapus tiket {{ tiket.no_tiket }}" class="btn btn-danger">Delete</button>
                 </div>
               </div>
             </div>

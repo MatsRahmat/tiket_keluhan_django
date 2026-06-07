@@ -4,33 +4,41 @@
   Create User
 {% endblock %}
 
+{% block card_header %}
+  <a href="{{ request.META.HTTP_REFERER }}" class="btn btn-light">Back</a>
+{% endblock %}
 
 {% block form %}
-    <div class="my-3">
-        <h4 class="text-center">{% if action == 'update'%}Ubah{% else %}Tambah{% endif %} user</h4>
-        <form action="{% if action == 'update' %}/user/{{object.id}}/edit{% endif %}" method="post">
-            {% csrf_token %}
-            <div class="row  mb-2">
-                {{ form.as_p }}
-            </div>
-            {% comment %} <div class="row mb-2">
-                <div class="mb-2">
-                    <label for="password">Password:</label>
-                    <input type="password" name="password" id="password" class="form-control" placeholder="*********" required>
-                </div>
-            </div> {% endcomment %}
-            <div class="d-flex justify-content-between gap-2">
-                <button type="reset" style="width: 100%;" class="btn btn-light border border-dark border rounded-3 text-capitalize">Reset form</button>
-                <button type="submit" style="width: 100%;" class="btn btn-primary border border rounded-3">Submit</button>
-            </div>
-        </form>
-    </div>
-{% endblock form %}
+  <div class="my-3">
+    <h4 class="text-center">
+      {% if action == 'update' %}
+        Ubah
+      {% else %}
+        Tambah
+      {% endif %}user
+    </h4>
+    <form action="{% if action == 'update' %}
+        /user/{{ object.id }}/edit
+      {% endif %}"
+      method="post">
+      {% csrf_token %}
+      <div class="row mb-2">{{ form.as_p }}</div>
+      {% comment %} <div class="row mb-2">
+        <div class="mb-2">
+          <label for="password">Password:</label>
+          <input type="password" name="password" id="password" class="form-control" placeholder="*********" required />
+        </div>
+      </div> {% endcomment %}
+      <div class="d-flex justify-content-between gap-2">
+        <button type="reset" style="width: 100%;" class="btn btn-light border border-dark border rounded-3 text-capitalize">Reset form</button>
+        <button type="submit" style="width: 100%;" class="btn btn-primary border border rounded-3">Submit</button>
+      </div>
+    </form>
+  </div>
+{% endblock %}
 
 {% block script %}
-<script>
-    $(document).ready(function(e){
-        
-    })
-</script>
-{% endblock script %}
+  <script>
+    $(document).ready(function (e) {})
+  </script>
+{% endblock %}

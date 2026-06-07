@@ -23,7 +23,7 @@
     <h2>Dashboard</h2>
     <hr />
     <section class="card">
-      <div class="card-body">
+      <div class="card-body content-table">
         <div class="d-flex flex-warp justify-content-around gap-2">
           {% comment %} ============ Total Tiket ============ {% endcomment %}
           {% if total_tiket %}
@@ -34,7 +34,7 @@
             </a>
           {% endif %}
           {% comment %} ============ Total Tiket ============ {% endcomment %}
-          {% if today_tiket %}
+          {% if today_tiket != None %}
             <a href="{% url 'list-tiket' %}" class="card p-2">
               <h5>Today Tiket</h5>
               <hr />
@@ -42,8 +42,8 @@
             </a>
           {% endif %}
           {% comment %} ============ Tiket need review ============ {% endcomment %}
-          {% if reviwed_tiket %}
-            <a href="{% url 'list-tiket-review' %}" class="card p-2">
+          {% if reviwed_tiket != None %}
+            <a href="{% url 'list-tiket-review' %}?status_review=not-reviewed" class="card p-2">
               <h5>Need Review Tiket</h5>
               <hr />
               <h2 class="text-end">{{ reviwed_tiket }}</h2>
@@ -59,18 +59,27 @@
           {% endif %}
           {% comment %} ============ Total Tiket Reject ============ {% endcomment %}
           {% if reject_tiket %}
-            <a href="{% url 'list-tiket-review' %}?status_review=reviewed&status=reject" class="card p-2">
-              <h5>Total Riject Tiket</h5>
-              <hr />
-              <h2 class="text-end">{{ reject_tiket }}</h2>
-            </a>
+          <a href="{% url 'list-tiket-review' %}?status_review=reviewed&status=reject" class="card p-2">
+            <h5>Total Riject Tiket</h5>
+            <hr />
+            <h2 class="text-end">{{ reject_tiket }}</h2>
+          </a>
           {% endif %}
           {% comment %} ============ Total User ============ {% endcomment %}
           {% if total_user %}
-            <a href="{% url 'user-list' %}" class="card p-2">
+          <a href="{% url 'user-list' %}" class="card p-2">
               <h5>Total User</h5>
               <hr />
               <h2 class="text-end">{{ total_user }}</h2>
+            </a>
+          {% endif %}
+
+          {% comment %} ============ Total Tiket assign ============ {% endcomment %}
+          {% if self_asign_tiket != None %}
+            <a href="{% url 'list-action-tiket' %}" class="card p-2">
+              <h5>Total Asign Tiket</h5>
+              <hr />
+            <h2 class="text-end">{{ self_asign_tiket }}</h2>
             </a>
           {% endif %}
         </div>

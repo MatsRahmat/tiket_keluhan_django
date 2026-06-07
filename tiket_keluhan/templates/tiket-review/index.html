@@ -35,7 +35,7 @@
       </form>
     </div>
     <hr />
-    <div class="" id="body-section" style="height: calc(50dvh); overflow-y: auto; overflow-x: hidden;">
+    <div class="content-table" id="body-section" style="">
       {% if tickets %}
         {% for tiket in tickets %}
           <div class="border-top border-bottom px-2">
@@ -52,6 +52,7 @@
                 <p>
                   Dibuat pada: <br /> <span>{{ tiket.created_at }}</span>
                 </p>
+                <p>Selesai pada: <br> <span>{{ tiket.action.updated_at }}</span></p>
               </div>
             </a>
           </div>

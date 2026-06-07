@@ -28,7 +28,7 @@
       </div>
     </div>
 
-    <div class="" id="body-section" style="height: calc(50dvh); overflow-y: auto; overflow-x: hidden;">
+    <div class="content-table" id="body-section" style="">
       {% if list_user %}
         {% for user in list_user %}
           <div class="row border-top border-bottom table-striped px-2 py-2" aria-label="row">
@@ -37,7 +37,7 @@
             <p class="col">{{ user.role_label }}</p>
             <div class="col-2 d-flex justify-content-center gap-2">
               <a role="button" href="{% url 'user-edit' user.id %}" class="btn btn-secondary" style="">Edit</a>
-              <a role="button" href="{% url 'user-delete' user.id %}" class="btn btn-danger" style="">Hapus</a>
+              <button data-delete="{{ user.id }}" data-delete-url="{% url 'user-delete' user.id %}" data-delete-mesg="Apakah anda yakin ingin menghapus {{ user.username }}?" class="btn btn-danger">Delete</button>
             </div>
           </div>
         {% endfor %}
