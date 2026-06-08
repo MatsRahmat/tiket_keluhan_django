@@ -223,16 +223,17 @@ class TiketHistoryListView(LoginRequiredMixin, ListView):
     template_name       = "tiket/index_history.html"
     context_object_name = "tikets"
     login_url           = "login"
+    paginate_by         = 10
     
     # def get_queryset(self):
     #     pass
     #     return super().get_queryset()
     
-    def get_context_data(self, **kwargs) -> dict[str, Any]:
-        context = super().get_context_data(**kwargs)
-        # context[""] = 
-        print(context)
-        return context
+    # def get_context_data(self, **kwargs) -> dict[str, Any]:
+    #     context = super().get_context_data(**kwargs)
+    #     # context[""] = 
+    #     print(context)
+    #     return context
     
 
 
@@ -244,7 +245,8 @@ class TiketHistoryListView(LoginRequiredMixin, ListView):
 class TiketListView(LoginRequiredMixin,ListView):
     # model = TiketModel
     context_object_name = "tickets"
-    template_name = "tiket/index.html"
+    template_name       = "tiket/index.html"
+    paginate_by         = 10
     
     def get_queryset(self):
         role = self.request.session.get("role")
@@ -576,10 +578,11 @@ class TiketAssignView(LoginRequiredMixin, CreateView):
         return redirect('list-tiket')
     
 class TiketActionList(LoginRequiredMixin,ListView):
-    model = TiketModel
-    template_name = "tiket-actions/index.html"
-    login_url = "login"
+    model               = TiketModel
+    template_name       = "tiket-actions/index.html"
+    login_url           = "login"
     context_object_name = "tickets"
+    paginate_by         = 10
     
     def get_queryset(self):
         logged_user = self.request.user
@@ -642,6 +645,7 @@ class TiketReviewList(LoginRequiredMixin,ListView):
     model           = TiketModel
     template_name   = "tiket-review/index.html"
     login_url       = "login"
+    paginate_by     = 10
     
     # def get_queryset(self):
     #     # qr = TiketModel.objects.filter(status=TiketStatusEnum.DONE.value,reviews__isnull=True)
@@ -799,6 +803,7 @@ class UserListView(LoginRequiredMixin,ListView):
     template_name       = "user/list_user.html"
     context_object_name = "list_user"
     login_url           = "login" # Fallback url ketika belum login
+    paginate_by         = 10
     
     def get_queryset(self):
         qs = super().get_queryset()
