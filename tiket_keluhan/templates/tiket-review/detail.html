@@ -1,4 +1,6 @@
 {% extends 'content_layout.html' %}
+{% load static %}
+{% load custom_filters %}
 
 {% block content %}
   <div class="card">
@@ -65,7 +67,7 @@
                 <div class="col-3">Assign At</div>
                 <div class="col-9">: {{ tiket_action.created_at }}</div>
                 <div class="col-3">Last Update</div>
-                <div class="col-9">: {{ tiket_action.created_at }}</div>
+                <div class="col-9">: {{ tiket.updated_at }}</div>
               </div>
               <div class="col-6">
                 <label for="" class="form-label">Note</label>
@@ -89,7 +91,12 @@
               </div>
               <div class="col-6">
                 <label for="">Rating:</label>
-                <input type="text" class="form-control" value="{{ tiket_reviewed.rating }}" disabled />
+                {% comment %} <input type="text" class="form-control" value="{{ tiket_reviewed.rating }}" disabled /> {% endcomment %}
+                <div class="d-flex justify-content-start align-items-center gap-2">
+                  {% for i in tiket.review.rating|times %}
+                    <img src="{% static 'assets/icons/star_fill.svg' %}" alt="start" style="width: 1.4rem; height: 1.4rem; aspect-ratio: 1/1;" />
+                  {% endfor %}
+                </div>
               </div>
               <div class="col mt-2">
                 <textarea name="" id="" class="form-control" rows="5" disabled>{{ tiket_reviewed.evaluation }}</textarea>

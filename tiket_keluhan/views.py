@@ -225,6 +225,12 @@ class TiketHistoryListView(LoginRequiredMixin, ListView):
     login_url           = "login"
     paginate_by         = 10
     
+    def get_queryset(self):
+        # ubah order menjadi descending
+        qr = super().get_queryset().order_by('-timestamp')
+        return qr
+    
+    
     # def get_queryset(self):
     #     pass
     #     return super().get_queryset()
@@ -358,6 +364,14 @@ class TiketDetailView(LoginRequiredMixin,DetailView):
         # context["form"] = self.form_class(instance=self.object) 
         # context["action"] = "update"
         # print(self.object)
+        tiket = context["tiket"]
+        
+        if hasattr(tiket,"action"):
+            context["tiket_action"] = tiket.action
+            
+        if hasattr(tiket,"review"):
+            context["tiket_reviewed"] = tiket.review
+        
         attachment = getattr(self.object, "attachment", None)
         if attachment:
             context["attachment"] = attachment
@@ -519,6 +533,8 @@ class TiketAssignView(LoginRequiredMixin, CreateView):
     login_url       = 'login'
     fields          = ['tiket', 'aktor', 'action_type']
     http_method_names = ['post', 'get']
+    
+    
     
     def get_context_data(self, **kwargs) -> dict[str, Any]:
         context = super().get_context_data(**kwargs)
@@ -717,16 +733,14 @@ class TiketReviewDetail(LoginRequiredMixin,DetailView):
         if hasattr(tiket,"action"):
             # print(tiket.action)
             context["tiket_action"] = tiket.action
-        else:
-            print("Tidak punya action")
+            
             
         if hasattr(tiket,"review"):
             # print(tiket.review)
             context["tiket_reviewed"] = tiket.review
-        else:
-            print("tidak punya review")
+
         
-        print(tiket.action)
+        # print(tiket.action)
         return context
     
 class TiketReviewForm(LoginRequiredMixin,CreateView):
@@ -746,6 +760,13 @@ class TiketReviewForm(LoginRequiredMixin,CreateView):
         review_action = self.request.POST.get("action_status", "")
         review_tiket = TiketModel.objects.get(id=self.kwargs.get("pk",""))
         logged_user = self.request.user
+        review_ratting = self.request.POST.get('rating')
+        
+        if not review_ratting:
+            messages.error(self.request, "Kolom Rating diperlukan")
+            return redirect(self.request.path)
+            # form.add_error('rating', 'rating diperlukan')
+            # return self.form_invalid(form)
         
         reviewer = form.save(commit=False)
         reviewer.rating = self.request.POST.get('rating','')

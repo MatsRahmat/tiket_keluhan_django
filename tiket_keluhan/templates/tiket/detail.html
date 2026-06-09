@@ -1,4 +1,7 @@
 {% extends 'content_layout.html' %}
+{% load static %}
+{% load custom_filters %}
+
 
 {% block title %}
   Detail Tiket #{{ tiket }}
@@ -38,30 +41,86 @@
       </section>
       <hr class="my-1" />
       <section class="" style="overflow-x: hidden; overflow-y: auto; height: calc(60dvh);">
-        <div class="row mb-2">
-          <div class="col">
-            <label for="" class="form-label">Judul</label>
-            <input type="text" value="{{ tiket.subject }}" class="form-control form-disabled" disabled />
-          </div>
-          <div class="col">
-            <label for="" class="form-label">Dibuat oleh</label>
-            <input type="text" value="{{ tiket.login_id }}" class="form-control form-disabled" disabled />
-          </div>
-        </div>
-        <div class="mb-2">
-          <label for="" class="form-label">Keterangan</label>
-          <textarea disabled class="form-control form-disable" rows="5">{{ tiket.description }}</textarea>
-        </div>
-        <div>
-          <label for="" class="form-label">Media</label>
-          {% if attachment %}
-            <div>
-              <a href="{{ attachment.file.url }}" style="cursor: pointer;" target="_blank"><img src="{{ attachment.file.url }}" alt="tiket-{{ tiket }}-media" style="width: 50%;" /></a>
+        <section id="detail">
+          <div class="row mb-2">
+            <div class="col">
+              <label for="" class="form-label">Judul</label>
+              <input type="text" value="{{ tiket.subject }}" class="form-control form-disabled" disabled />
             </div>
-          {% else %}
-            <p>Tidak ada media yg di unggah</p>
+            <div class="col">
+              <label for="" class="form-label">Dibuat oleh</label>
+              <input type="text" value="{{ tiket.login_id }}" class="form-control form-disabled" disabled />
+            </div>
+          </div>
+          <div class="mb-2">
+            <label for="" class="form-label">Keterangan</label>
+            <textarea disabled class="form-control form-disable" rows="5">{{ tiket.description }}</textarea>
+          </div>
+          <div>
+            <label for="" class="form-label">Media</label>
+            {% if attachment %}
+              <div>
+                <a href="{{ attachment.file.url }}" style="cursor: pointer;" target="_blank"><img src="{{ attachment.file.url }}" alt="tiket-{{ tiket }}-media" style="width: 50%;" /></a>
+              </div>
+            {% else %}
+              <p>Tidak ada media yg di unggah</p>
+            {% endif %}
+          </div>
+        </section>
+
+        {% comment %}====================== Executor info ======================{% endcomment %}
+        <section id="action">
+          {% if tiket_action %}
+            <hr />
+            <h5 class="text-center">Action Executor</h5>
+            <hr />
+            <div class="row">
+              <div class="col-6 row">
+                <div class="col-3">Execute By</div>
+                <div class="col-9">: {{ tiket_action.aktor }}</div>
+                <div class="col-3">Action Type</div>
+                <div class="col-9">: {{ tiket_action.action_type }}</div>
+                <div class="col-3">Assign At</div>
+                <div class="col-9">: {{ tiket_action.created_at }}</div>
+                <div class="col-3">Last Update</div>
+                <div class="col-9">: {{ tiket_action.updated_at }}</div>
+              </div>
+              <div class="col-6">
+                <label for="" class="form-label">Note</label>
+                <textarea name="" id="" rows="5" class="form-control" disabled>{{ tiket_action.note }}</textarea>
+              </div>
+            </div>
           {% endif %}
-        </div>
+        </section>
+        {% comment %}====================== End Executor info ======================{% endcomment %}
+
+        {% comment %}====================== Review info ======================{% endcomment %}
+        <section id="review-info">
+          {% if tiket_reviewed %}
+            <hr />
+            <h5 class="text-center">Reviewer</h5>
+            <hr />
+            <div class="row p-2">
+              <div class="col-6">
+                <label for="">Review By:</label>
+                <input type="text" class="form-control" value="{{ tiket_reviewed.reviewer.username }}" disabled />
+              </div>
+              <div class="col-6">
+                <label for="">Rating:</label>
+                {% comment %} <input type="text" class="form-control" value="{{ tiket_reviewed.rating }}" disabled /> {% endcomment %}
+                <div class="d-flex justify-content-start align-items-center gap-2">
+                  {% for i in tiket.review.rating|times %}
+                    <img src="{% static 'assets/icons/star_fill.svg' %}" alt="start" style="width: 1.4rem; height: 1.4rem; aspect-ratio: 1/1;" />
+                  {% endfor %}
+                </div>
+              </div>
+              <div class="col mt-2">
+                <textarea name="" id="" class="form-control" rows="5" disabled>{{ tiket_reviewed.evaluation }}</textarea>
+              </div>
+            </div>
+          {% endif %}
+        </section>
+        {% comment %}====================== End Review info ======================{% endcomment %}
       </section>
     </div>
   </div>
